@@ -6,11 +6,12 @@ import './App.css'
 import Navbar from './components/common/Navbar/Navbar';
 import Footer from './components/common/Footer/Footer';
 
+
 function App() {
   return (
     <div className='w-full'>
       <Navbar/>
-      <Footer/>
+      {/* <Footer/> */}
     </div>
   );
 }
