@@ -2,6 +2,7 @@ import React from 'react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, ShoppingCart, Heart, ChevronDown, User, Menu, X } from 'lucide-react';
+import Filter from '../../ui/Filters/Filter';
 
 export default function Navbar() {
   const [searchText, setSearchText] = useState('');
@@ -12,7 +13,7 @@ export default function Navbar() {
   };
   
   return (
-    <div className="fixed top-0 left-0 w-full bg-white shadow-sm z-50">
+    <div className="fixed top-0 left-0 w-full bg-white shadow-sm z-50 rounded-b-lg">
       {/* Top bar */}
       <div className="hidden sm:flex justify-between items-center py-2 px-4 text-sm border-b border-gray-100">
         <div className="flex items-center">
@@ -160,6 +161,10 @@ export default function Navbar() {
           </nav>
         </div>
       )}
+      <div>
+        <Filter />
+      </div>
     </div>
+    
   );
 }
