@@ -18,8 +18,8 @@ const Footer = () => {
   };
 
   return (
-    <footer className="fixed left-0 w-full bg-white text-black px-6 py-12 mt-20 border-t text-sm">
-      <div className="max-w-7xl mx-auto">
+    <footer className=" bg-white w-screen text-black px-6 py-12 mt-20 border-t text-sm">
+      <div className=" mx-auto">
         {/* Mobile view - Accordion style */}
         <div className="md:hidden">
           {/* Left section */}

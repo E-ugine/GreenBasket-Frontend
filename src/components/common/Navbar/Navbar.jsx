@@ -13,7 +13,7 @@ export default function Navbar() {
   };
   
   return (
-    <div className="fixed top-0 left-0 w-full bg-white shadow-sm z-50 rounded-b-lg">
+    <div className="fixed top-0  left-0 w-full bg-white shadow-sm z-50 rounded-b-lg">
       {/* Top bar */}
       <div className="hidden sm:flex justify-between items-center py-2 px-4 text-sm border-b border-gray-100">
         <div className="flex items-center">
@@ -22,8 +22,8 @@ export default function Navbar() {
         </div>
         
         <div className="flex items-center space-x-4">
-          <a href="#" className="hover:text-green-600">Sell on GreenBasket</a>
-          <a href="#" className="hover:text-green-600">Order Tracking</a>
+          <a href="#" className="text-gray-500 hover:text-green-600">Sell on GreenBasket</a>
+          <a href="#" className="text-gray-500 hover:text-green-600">Order Tracking</a>
           
           <div className="flex items-center cursor-pointer">
             <span className='text-black'>Ksh</span>
