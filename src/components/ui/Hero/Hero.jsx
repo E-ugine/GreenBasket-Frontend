@@ -19,7 +19,7 @@ export default function HeroComponent() {
   ];
 
   return (
-    <div className="w-full flex flex-col lg:flex-row lg:space-x-6 p-4 rounded-lg border-2 md:border-4 py-6 md:py-12 mt-6 md:mt-12 lg:mt-34 border-red-500">
+    <div className="w-full flex flex-col lg:flex-row lg:space-x-6 p-4 rounded-lg border-2 md:border-4 py-6 md:py-12 mt-6 md:mt-12 lg:mt-34 border-white">
       {/* Mobile Category Menu Toggle */}
       <div className="lg:hidden flex justify-between items-center mb-4">
         <h2 className="text-red-500 font-bold">SALE 40% OFF</h2>
