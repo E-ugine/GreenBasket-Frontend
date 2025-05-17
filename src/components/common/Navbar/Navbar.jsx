@@ -56,8 +56,8 @@ export default function Navbar() {
             <span className="text-white text-xl md:text-2xl">≡</span>
           </div>
           <div>
-            <div className="text-black font-bold font-mono text-lg md:text-xl">GreenBasket</div>
-            <div className="text-black text-xs md:text-sm font-medium">TECH MART</div>
+            <div className="text-green-500 font-bold font-mono text-lg md:text-xl">GreenBasket</div>
+            <div className="text-green-500 text-xs md:text-sm font-medium">TECH MART</div>
           </div>
         </div>
         
