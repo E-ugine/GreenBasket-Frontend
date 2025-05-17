@@ -6,14 +6,17 @@ import './App.css'
 import Navbar from './components/common/Navbar/Navbar';
 import Home from './pages/Home';
 import Footer from './components/common/Footer/Footer';
+import ProductView from './components/products/ProductView';
+
 
 
 function App() {
   return (
     <div>
-      <Navbar/>
-      <Home/>
-      <Footer/>
+      {/* <Navbar/> */}
+      {/* <Home/> */}
+      {/* <Footer/> */}
+      <ProductView/>
     </div>
   );
 }
