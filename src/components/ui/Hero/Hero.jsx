@@ -19,7 +19,7 @@ export default function HeroComponent() {
   ];
 
   return (
-    <div className="w-full flex flex-col lg:flex-row lg:space-x-6 p-4 rounded-lg border-2 md:border-4 py-6 md:py-12 mt-6 md:mt-12 lg:mt-34 border-red-500">
+    <div className="w-full flex flex-col lg:flex-row lg:space-x-6 p-4 rounded-lg border-2 md:border-4 py-6 md:py-12 mt-6 md:mt-12 lg:mt-34 border-white">
       {/* Mobile Category Menu Toggle */}
       <div className="lg:hidden flex justify-between items-center mb-4">
         <h2 className="text-red-500 font-bold">SALE 40% OFF</h2>
@@ -52,10 +52,10 @@ export default function HeroComponent() {
         <section className="flex flex-col md:flex-row bg-white rounded-xl overflow-hidden shadow-lg p-4 md:p-6 items-center transition-transform hover:scale-[1.01] md:hover:scale-[1.03] duration-200">
           {/* Text Section */}
           <div className="w-full md:w-1/2 pr-0 md:pr-6 mb-4 md:mb-0 text-center md:text-left">
-            <h2 className="text-2xl md:text-3xl font-extrabold text-gray-500">
+            <h2 className="text-2xl md:text-3xl font-extrabold text-neutral-900">
               Noise Cancelling
             </h2>
-            <h3 className="text-xl md:text-2xl font-semibold text-gray-500 mt-2">Headphone</h3>
+            <h3 className="text-xl md:text-2xl font-semibold text-neutral-900 mt-2">Headphone</h3>
             <p className="mt-4 text-sm md:text-base text-gray-700 leading-relaxed">
               Boso Over-Ear Headphone <br />
               Wifi, Voice Assistant, <br />
@@ -89,7 +89,7 @@ export default function HeroComponent() {
                 Sono Playgo 5 from{" "}
                 <span className="text-green-500">$569</span>
               </h3>
-              <button className="text-green-500 text-sm font-semibold hover:underline">
+              <button className="text-green-500 text-sm font-semibol">
                 DISCOVER NOW
               </button>
             </div>

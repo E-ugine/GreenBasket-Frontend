@@ -174,7 +174,7 @@ export default function Deals() {
         
         {/* Tablets and laptops offer */}
         <div className="bg-white rounded-lg overflow-hidden w-full sm:w-1/2 lg:w-full h-40 sm:h-44 lg:h-40">
-          <img src="https://i.pinimg.com/736x/8d/19/df/8d19df0f1d0347d9dec351afa2554106.jpg" alt="Tablets and laptops" className="w-full h-full object-cover" />
+          <img src="https://i.pinimg.com/736x/8d/19/df/8d19df0f1d0347d9dec351afa2554106.jpg" alt="Tablets and laptops" className="w-full h-full object-contain" />
         </div>
       </div>
     </div>
