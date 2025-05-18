@@ -60,7 +60,6 @@ button {
   font-family: inherit;
   cursor: pointer;
   transition: border-color 0.25s;
-  background-color: white;
   color: #213547;
   max-width: 100%;
   white-space: normal;
@@ -89,4 +88,13 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+  /* In your global CSS */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid  #059669;
+  outline-offset: 2px;
+}
 }
