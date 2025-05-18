@@ -2,6 +2,13 @@ import React, { useState } from 'react';
 import { FaFacebookF, FaInstagram, FaYoutube, FaPinterestP, FaTwitter } from 'react-icons/fa';
 import { IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
 
+
+import mpesaIcon from '/public/images/mpesa.png';
+import paypalIcon from '/public/images/paypal.png';
+import mastercardIcon from '/public/images/mastercard.png';
+import visaIcon from '/public/images/visa.png';
+import stripeIcon from '/public/images/stripe.png';
+
 const Footer = () => {
   const [openSections, setOpenSections] = useState({
     categories: false,
@@ -10,6 +17,8 @@ const Footer = () => {
     partner: false
   });
 
+  const [email, setEmail] = useState('');
+
   const toggleSection = (section) => {
     setOpenSections(prev => ({
       ...prev,
@@ -17,235 +26,185 @@ const Footer = () => {
     }));
   };
 
+  const handleSubscribe = (e) => {
+    e.preventDefault();
+    // Add subscription logic here
+    console.log('Subscribed with:', email);
+    setEmail('');
+  };
+
+  // Data for reusable sections
+  const sections = {
+    categories: {
+      title: 'TOP CATEGORIES',
+      items: ['Laptops', 'PC & Computers', 'Cell Phones', 'Tablets', 'Gaming & VR', 'Networks', 'Cameras', 'Sounds', 'Office']
+    },
+    company: {
+      title: 'COMPANY',
+      items: ['About GreenBasket', 'Contact', 'Career', 'Blog', 'Sitemap', 'Store Locations']
+    },
+    help: {
+      title: 'HELP CENTER',
+      items: ['Customer Service', 'Policy', 'Terms & Conditions', 'Track Order', 'FAQs', 'My Account', 'Product Support']
+    },
+    partner: {
+      title: 'PARTNER',
+      items: ['Become Seller', 'Affiliate', 'Advertise', 'Partnership']
+    }
+  };
+
+  const paymentMethods = [
+    { icon: mpesaIcon, alt: 'M-Pesa' },
+    { icon: paypalIcon, alt: 'PayPal' },
+    { icon: mastercardIcon, alt: 'Mastercard' },
+    { icon: visaIcon, alt: 'Visa' },
+    { icon: stripeIcon, alt: 'Stripe' }
+  ];
+
+  const renderAccordionSection = (sectionKey) => (
+    <div className="border-b py-3" key={sectionKey}>
+      <button
+        className="font-bold text-sm flex justify-between items-center w-full"
+        onClick={() => toggleSection(sectionKey)}
+        aria-expanded={openSections[sectionKey]}
+        aria-controls={`${sectionKey}-content`}
+      >
+        <h3>{sections[sectionKey].title}</h3>
+        {openSections[sectionKey] ? <IoIosArrowUp /> : <IoIosArrowDown />}
+      </button>
+      {openSections[sectionKey] && (
+        <ul id={`${sectionKey}-content`} className="space-y-2 mt-2">
+          {sections[sectionKey].items.map((item, index) => (
+            <li key={index} className="hover:text-green-500 cursor-pointer">{item}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+
+  const renderDesktopSection = (sectionKey) => (
+    <div key={sectionKey}>
+      <h3 className="font-bold mb-3 text-sm">{sections[sectionKey].title}</h3>
+      <ul className="space-y-2 text-sm">
+        {sections[sectionKey].items.map((item, index) => (
+          <li key={index} className="hover:text-green-500 cursor-pointer">{item}</li>
+        ))}
+      </ul>
+    </div>
+  );
+
   return (
-    <footer className=" bg-white w-screen text-black px-6 py-12 mt-20 border-t text-sm">
-      <div className=" mx-auto">
+    <footer className="bg-white w-full text-black px-4 sm:px-6 py-12 mt-20 border-t text-sm">
+      <div className="max-w-7xl mx-auto">
         {/* Mobile view - Accordion style */}
-        <div className="md:hidden">
+        <div className="md:hidden space-y-2">
           {/* Left section */}
           <div className="mb-8">
-            <h2 className="font-bold text-lg mb-2">GreenBasket - TECH ONLINE MARKET</h2>
+            <h2 className="font-bold text-lg mb-3">GreenBasket - TECH ONLINE MARKET</h2>
             <p className="mb-1 text-xs">HOTLINE 24/7</p>
             <p className="text-green-500 text-2xl font-bold mb-4">(+254) 797 783 251</p>
-            <p className="text-xs mb-1">254 Thika Road, Kahawa Wendani,Thika</p>
+            <address className="text-xs mb-1 not-italic">254 Thika Road, Kahawa Wendani, Thika</address>
             <p className="text-xs mb-4">contact@GreenBaskettechmart.com</p>
+            
             <div className="flex space-x-4 mb-6">
-              <FaTwitter className="w-6 h-6 text-gray-600" />
-              <FaFacebookF className="w-6 h-6 text-gray-600" />
-              <FaInstagram className="w-6 h-6 text-gray-600" />
-              <FaYoutube className="w-6 h-6 text-gray-600" />
-              <FaPinterestP className="w-6 h-6 text-gray-600" />
+              <a href="#" aria-label="Twitter"><FaTwitter className="w-5 h-5 text-gray-600 hover:text-green-500" /></a>
+              <a href="#" aria-label="Facebook"><FaFacebookF className="w-5 h-5 text-gray-600 hover:text-green-500" /></a>
+              <a href="#" aria-label="Instagram"><FaInstagram className="w-5 h-5 text-gray-600 hover:text-green-500" /></a>
+              <a href="#" aria-label="YouTube"><FaYoutube className="w-5 h-5 text-gray-600 hover:text-green-500" /></a>
+              <a href="#" aria-label="Pinterest"><FaPinterestP className="w-5 h-5 text-gray-600 hover:text-green-500" /></a>
             </div>
-            <div className="flex items-center space-x-4">
-              <button className="bg-zinc-100 border px-4 py-2 rounded flex items-center text-xs">
+            
+            <div className="flex items-center space-x-3">
+              <button className="bg-zinc-100 border px-3 py-1.5 rounded flex items-center text-xs hover:bg-zinc-200">
                 KSH <IoIosArrowDown className="ml-1" />
               </button>
-              <button className="bg-zinc-100 border px-4 py-2 rounded flex items-center text-xs">
+              <button className="bg-zinc-100 border px-3 py-1.5 rounded flex items-center text-xs hover:bg-zinc-200">
                 <span className="mr-1">🇰🇪</span> Eng <IoIosArrowDown className="ml-1" />
               </button>
             </div>
           </div>
 
-          {/* Collapsible categories section */}
-          <div className="border-b py-2">
-            <div 
-              className="font-bold text-sm flex justify-between items-center cursor-pointer"
-              onClick={() => toggleSection('categories')}
-            >
-              <h3>TOP CATEGORIES</h3>
-              {openSections.categories ? <IoIosArrowUp /> : <IoIosArrowDown />}
-            </div>
-            {openSections.categories && (
-              <ul className="space-y-1 text-sm mt-2">
-                <li>Laptops</li>
-                <li>PC & Computers</li>
-                <li>Cell Phones</li>
-                <li>Tablets</li>
-                <li>Gaming & VR</li>
-                <li>Networks</li>
-                <li>Cameras</li>
-                <li>Sounds</li>
-                <li>Office</li>
-              </ul>
-            )}
-          </div>
-
-          {/* Collapsible company section */}
-          <div className="border-b py-2">
-            <div 
-              className="font-bold text-sm flex justify-between items-center cursor-pointer"
-              onClick={() => toggleSection('company')}
-            >
-              <h3>COMPANY</h3>
-              {openSections.company ? <IoIosArrowUp /> : <IoIosArrowDown />}
-            </div>
-            {openSections.company && (
-              <ul className="space-y-1 text-sm mt-2">
-                <li>About GreenBasket</li>
-                <li>Contact</li>
-                <li>Career</li>
-                <li>Blog</li>
-                <li>Sitemap</li>
-                <li>Store Locations</li>
-              </ul>
-            )}
-          </div>
-
-          {/* Collapsible help center section */}
-          <div className="border-b py-2">
-            <div 
-              className="font-bold text-sm flex justify-between items-center cursor-pointer"
-              onClick={() => toggleSection('help')}
-            >
-              <h3>HELP CENTER</h3>
-              {openSections.help ? <IoIosArrowUp /> : <IoIosArrowDown />}
-            </div>
-            {openSections.help && (
-              <ul className="space-y-1 text-sm mt-2">
-                <li>Customer Service</li>
-                <li>Policy</li>
-                <li>Terms & Conditions</li>
-                <li>Trach Order</li>
-                <li>FAQs</li>
-                <li>My Account</li>
-                <li>Product Support</li>
-              </ul>
-            )}
-          </div>
-
-          {/* Collapsible partner section */}
-          <div className="border-b py-2">
-            <div 
-              className="font-bold text-sm flex justify-between items-center cursor-pointer"
-              onClick={() => toggleSection('partner')}
-            >
-              <h3>PARTNER</h3>
-              {openSections.partner ? <IoIosArrowUp /> : <IoIosArrowDown />}
-            </div>
-            {openSections.partner && (
-              <ul className="space-y-1 text-sm mt-2">
-                <li>Become Seller</li>
-                <li>Affiliate</li>
-                <li>Advertise</li>
-                <li>Partnership</li>
-              </ul>
-            )}
-          </div>
+          {/* Accordion sections */}
+          {Object.keys(sections).map(renderAccordionSection)}
         </div>
 
         {/* Desktop view - Grid layout */}
-        <div className="hidden md:grid md:grid-cols-5 md:gap-10 md:items-start md:text-left">
+        <div className="hidden md:grid md:grid-cols-5 md:gap-8 lg:gap-10">
           {/* Left section */}
-          <div className="col-span-1">
-            <h2 className="font-bold text-lg mb-2">GreenBasket - TECH ONLINE MARKET</h2>
+          <div className="col-span-2">
+            <h2 className="font-bold text-lg mb-3">GreenBasket - TECH ONLINE MARKET</h2>
             <p className="mb-1 text-xs">HOTLINE 24/7</p>
             <p className="text-green-500 text-2xl font-bold mb-4">(+254) 797 783 251</p>
-            <p className="text-xs mb-1">254 Thika Road, Kahawa Wendani,Thika</p>
-            <p className="text-xs mb-4">contact@GreenBaskettechmart.com</p>
+            <address className="text-xs mb-1 not-italic">254 Thika Road, Kahawa Wendani, Thika</address>
+            <p className="text-xs mb-6">contact@GreenBaskettechmart.com</p>
+            
             <div className="flex space-x-4 mb-6">
-              <FaTwitter className="w-6 h-6 text-gray-600" />
-              <FaFacebookF className="w-6 h-6 text-gray-600" />
-              <FaInstagram className="w-6 h-6 text-gray-600" />
-              <FaYoutube className="w-6 h-6 text-gray-600" />
-              <FaPinterestP className="w-6 h-6 text-gray-600" />
+              <a href="#" aria-label="Twitter"><FaTwitter className="w-5 h-5 text-gray-600 hover:text-green-500" /></a>
+              <a href="#" aria-label="Facebook"><FaFacebookF className="w-5 h-5 text-gray-600 hover:text-green-500" /></a>
+              <a href="#" aria-label="Instagram"><FaInstagram className="w-5 h-5 text-gray-600 hover:text-green-500" /></a>
+              <a href="#" aria-label="YouTube"><FaYoutube className="w-5 h-5 text-gray-600 hover:text-green-500" /></a>
+              <a href="#" aria-label="Pinterest"><FaPinterestP className="w-5 h-5 text-gray-600 hover:text-green-500" /></a>
             </div>
-            <div className="flex items-center space-x-4">
-              <button className="bg-zinc-100 border px-4 py-2 rounded flex items-center text-xs">
+            
+            <div className="flex items-center space-x-3">
+              <button className="bg-zinc-100 border px-3 py-1.5 rounded flex items-center text-xs hover:bg-zinc-200">
                 KSH <IoIosArrowDown className="ml-1" />
               </button>
-              <button className="bg-zinc-100 border px-4 py-2 rounded flex items-center text-xs">
-                <span className=" mr-1">🇰🇪 </span> Eng <IoIosArrowDown className="ml-1" />
+              <button className="bg-zinc-100 border px-3 py-1.5 rounded flex items-center text-xs hover:bg-zinc-200">
+                <span className="mr-1">🇰🇪</span> Eng <IoIosArrowDown className="ml-1" />
               </button>
             </div>
           </div>
 
-          {/* Top Categories */}
-          <div>
-            <h3 className="font-bold mb-2 text-sm">TOP CATEGORIES</h3>
-            <ul className="space-y-1 text-sm">
-              <li>Laptops</li>
-              <li>PC & Computers</li>
-              <li>Cell Phones</li>
-              <li>Tablets</li>
-              <li>Gaming & VR</li>
-              <li>Networks</li>
-              <li>Cameras</li>
-              <li>Sounds</li>
-              <li>Office</li>
-            </ul>
-          </div>
-
-          {/* Company */}
-          <div>
-            <h3 className="font-bold mb-2 text-sm">COMPANY</h3>
-            <ul className="space-y-1 text-sm">
-              <li>About GreenBasket</li>
-              <li>Contact</li>
-              <li>Career</li>
-              <li>Blog</li>
-              <li>Sitemap</li>
-              <li>Store Locations</li>
-            </ul>
-          </div>
-
-          {/* Help Center */}
-          <div>
-            <h3 className="font-bold mb-2 text-sm">HELP CENTER</h3>
-            <ul className="space-y-1 text-sm">
-              <li>Customer Service</li>
-              <li>Policy</li>
-              <li>Terms & Conditions</li>
-              <li>Trach Order</li>
-              <li>FAQs</li>
-              <li>My Account</li>
-              <li>Product Support</li>
-            </ul>
-          </div>
-
-          {/* Partner */}
-          <div>
-            <h3 className="font-bold mb-2 text-sm">PARTNER</h3>
-            <ul className="space-y-1 text-sm">
-              <li>Become Seller</li>
-              <li>Affiliate</li>
-              <li>Advertise</li>
-              <li>Partnership</li>
-            </ul>
-          </div>
+          {/* Other sections */}
+          {Object.keys(sections).map(renderDesktopSection)}
         </div>
-      </div>
 
-      {/* Subscribe - responsive for all screens */}
-      <div className="max-w-4xl mx-auto mt-16">
-        <h3 className="font-bold text-sm mb-2">
-          SUBSCRIBE & GET <span className="text-red-600 font-bold">10% OFF</span> FOR YOUR FIRST ORDER
-        </h3>
-        <div className="flex flex-col md:flex-row items-center border-b py-2">
-          <input
-            type="email"
-            placeholder="Enter your email address"
-            className="flex-1 outline-none text-sm mb-2 md:mb-0 w-full md:w-auto"
-          />
-         <button className="text-green-500 text-xs font-semibold md:ml-4 px-4 py-2 border border-yellow-500 hover:bg-yellow-50 rounded w-full md:w-auto">
-            SUBSCRIBE
-          </button>
+        {/* Subscribe section */}
+        <div className="max-w-4xl mx-auto mt-12 lg:mt-16">
+          <h3 className="font-bold text-sm mb-3">
+            SUBSCRIBE & GET <span className="text-red-600 font-bold">10% OFF</span> FOR YOUR FIRST ORDER
+          </h3>
+          <form onSubmit={handleSubscribe} className="flex flex-col md:flex-row items-center border-b pb-2 gap-3">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email address"
+              className="flex-1 outline-none text-sm w-full px-2 py-1.5 border rounded-md focus:ring-1 focus:ring-green-500"
+              required
+            />
+            <button 
+              type="submit"
+              className="text-green-500 text-xs font-semibold px-4 py-2 border border-yellow-500 hover:bg-yellow-50 rounded w-full md:w-auto whitespace-nowrap"
+            >
+              SUBSCRIBE
+            </button>
+          </form>
+          <p className="text-xs italic mt-2">
+            By subscribing, you're accepted to our <a href="#" className="underline hover:text-green-500">Policy</a>
+          </p>
         </div>
-        <p className="text-xs italic mt-1">
-          By subscribing, you're accepted the our <span className="underline">Policy</span>
-        </p>
-      </div>
 
-      {/* Bottom Footer - responsive for all screens */}
-      <div className="flex flex-col md:flex-row justify-between items-center mt-10 text-xs text-gray-600 border-t pt-6">
-        <p className="mb-4 md:mb-0 text-center md:text-left">© 2025 <span className="font-bold text-black">GreenBasket</span>. All Rights Reserved</p>
-        <div className="flex items-center justify-center flex-wrap gap-2 mb-4 md:mb-0">
-          <img src="/src/assets/icons/mpesa.png" alt="mpesa" className="h-6" />
-          <img src="/src/assets/icons/paypal.png" alt="paypal" className="h-6" />
-          <img src="/src/assets/icons/mastercard.png" alt="mastercard" className="h-6" />
-          <img src="/src/assets/icons/visa.png" alt="visa" className="h-6" />
-          <img src="/src/assets/icons/stripe.png" alt="stripe" className="h-6" />
+        {/* Bottom Footer */}
+        <div className="flex flex-col md:flex-row justify-between items-center mt-10 pt-6 border-t text-xs text-gray-600">
+          <p className="mb-4 md:mb-0 text-center md:text-left">
+            © 2025 <span className="font-bold text-black">GreenBasket</span>. All Rights Reserved
+          </p>
+          
+          <div className="flex items-center justify-center flex-wrap gap-3 mb-4 md:mb-0">
+            {paymentMethods.map((method, index) => (
+              <img 
+                key={index} 
+                src={method.icon} 
+                alt={method.alt} 
+                className="h-6 object-contain hover:scale-105 transition-transform" 
+              />
+            ))}
+          </div>
+          
+          <a href="#" className="text-blue-500 underline hover:text-blue-700">Mobile Site</a>
         </div>
-        <a href="#" className="text-blue-500 underline">Mobile Site</a>
       </div>
     </footer>
   );
