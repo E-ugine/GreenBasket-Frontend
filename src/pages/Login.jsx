@@ -116,7 +116,7 @@ export default function Login() {
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-500">
                 NEW USER ?{' '}
-                <a href="/signup" className="font-medium text-green-500 hover:text-green-600">
+                <a href="/register" className="font-medium text-green-500 hover:text-green-600">
                   SIGN UP
                 </a>
               </p>
