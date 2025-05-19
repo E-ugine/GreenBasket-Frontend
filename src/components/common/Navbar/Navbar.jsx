@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { Search, ShoppingCart, Heart, ChevronDown, User, Menu, X } from 'lucide-react';
-import Filter from '../../ui/Filters/Filter'
 
 const NAV_LINKS = [
   { name: 'Home', path: '/', aria: 'Navigate to homepage' },
@@ -340,8 +339,10 @@ const Navbar = () => {
       </div>
 
       {/* Spacer to prevent content from being hidden behind fixed navbar */}
-      <div className="h-20 md:h-24"></div>
+      
+      
     </>
+    
   );
 };
 
