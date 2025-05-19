@@ -3,11 +3,11 @@ import { FaFacebookF, FaInstagram, FaYoutube, FaPinterestP, FaTwitter } from 're
 import { IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
 
 
-import mpesaIcon from '/public/images/mpesa.png';
-import paypalIcon from '/public/images/paypal.png';
-import mastercardIcon from '/public/images/mastercard.png';
-import visaIcon from '/public/images/visa.png';
-import stripeIcon from '/public/images/stripe.png';
+import mpesaIcon from '/images/mpesa.png';
+import paypalIcon from '/images/paypal.png';
+import mastercardIcon from '/images/mastercard.png';
+import visaIcon from '/images/visa.png';
+import stripeIcon from '/images/stripe.png';
 
 const Footer = () => {
   const [openSections, setOpenSections] = useState({
