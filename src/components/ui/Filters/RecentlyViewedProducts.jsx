@@ -7,7 +7,7 @@ const RecentlyViewedProducts = () => {
       id: 1,
       name: "Xomie Remid 8 Sport Watch",
       price: 579.00,
-      image: "https://i.pinimg.com/236x/71/42/60/7142602ef88872909fe456606842324f.jpg", // Reduced size
+      image: "https://i.pinimg.com/236x/71/42/60/7142602ef88872909fe456606842324f.jpg", 
       isNew: true,
       rating: 4.5,
       reviews: 152,
@@ -17,7 +17,7 @@ const RecentlyViewedProducts = () => {
       id: 2,
       name: "Microte Surface 2.0 Laptop",
       price: 979.00,
-      image: "https://i.pinimg.com/236x/6a/04/cc/6a04cc90980648b5bdda45d7c2be400c.jpg", // Reduced size
+      image: "https://i.pinimg.com/236x/6a/04/cc/6a04cc90980648b5bdda45d7c2be400c.jpg", 
       isNew: true,
       rating: 4.8,
       colors: ["#000000", "#6B7280"]
@@ -27,7 +27,7 @@ const RecentlyViewedProducts = () => {
       name: "Ergonomic Gaming Chair",
       minPrice: 979.00,
       maxPrice: 1259.00,
-      image: "https://i.pinimg.com/236x/03/cc/a5/03cca58147d6cb2a44b6cde81fb574b6.jpg", // Reduced size
+      image: "https://i.pinimg.com/236x/03/cc/a5/03cca58147d6cb2a44b6cde81fb574b6.jpg", 
       rating: 4.2,
       colors: ["#000000", "#10B981"]
     },
@@ -36,7 +36,7 @@ const RecentlyViewedProducts = () => {
       name: "SROK Smart Phone 128GB",
       price: 579.00,
       originalPrice: 779.00,
-      image: "https://i.pinimg.com/236x/33/af/ba/33afbafaaa77f8020298bf3bd2075798.jpg", // Reduced size
+      image: "https://i.pinimg.com/236x/33/af/ba/33afbafaaa77f8020298bf3bd2075798.jpg", 
       discount: 200.00,
       rating: 4.7,
       reviews: 152,
@@ -88,14 +88,14 @@ const RecentlyViewedProducts = () => {
               </svg>
             </button>
 
-            {/* Product Image - Optimized Container */}
-            <div className="relative pt-[100%] bg-gray-50">
+            {/* Product Image */}
+            <div className="relative pt-[50%] bg-gray-50">
               <img
                 src={product.image}
                 alt={product.name}
                 className="absolute top-0 left-0 w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
-                loading="lazy" // Lazy loading
-                width="200" // Explicit dimensions
+                loading="lazy"
+                width="200" 
                 height="200"
               />
             </div>
