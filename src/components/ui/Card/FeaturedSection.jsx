@@ -24,47 +24,61 @@ const FeaturedSection = () => {
   return (
     <div className="w-full px-4 py-6 md:px-8 lg:px-16 bg-gray-50">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        
         {/* Featured Brands */}
-        <div className="bg-white p-5 rounded-lg shadow-sm">
+        <div className="bg-white p-5 rounded-lg shadow-sm overflow-hidden">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold">FEATURED BRANDS</h2>
-            <button className="text-sm text-gray-500 hover:underline">View All</button>
+            <h2 className="text-lg font-bold text-gray-900">FEATURED BRANDS</h2>
+            <button 
+              className="text-sm text-gray-500 hover:underline focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 rounded px-1"
+              aria-label="View all brands"
+            >
+              View All
+            </button>
           </div>
-          <div className="grid grid-cols-5 gap-4 items-center justify-items-center">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4 items-center justify-items-center">
             {brands.map((brand, index) => (
               <img
                 key={index}
                 src={brand.logo}
-                alt={brand.name}
+                alt={`${brand.name} logo`}
                 className="h-8 object-contain max-w-[80px] transition-transform duration-300 ease-in-out hover:scale-110"
                 style={{ transitionDelay: `${index * 50}ms` }}
+                loading="lazy"
+                width={80}
+                height={32}
               />
             ))}
           </div>
         </div>
 
         {/* Top Categories */}
-        <div className="bg-white p-5 rounded-lg shadow-sm">
+        <div className="bg-white p-5 rounded-lg shadow-sm overflow-hidden">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold">TOP CATEGORIES</h2>
-            <button className="text-sm text-gray-500 hover:underline">View All</button>
+            <h2 className="text-lg font-bold text-gray-900">TOP CATEGORIES</h2>
+            <button 
+              className="text-sm text-gray-500 hover:underline focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 rounded px-1"
+              aria-label="View all categories"
+            >
+              View All
+            </button>
           </div>
-          <div className="grid grid-cols-4 gap-4 items-center justify-items-center">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 items-center justify-items-center">
             {categories.map((cat, index) => (
               <div key={index} className="flex flex-col items-center space-y-2 group">
                 <img
                   src={cat.image}
-                  alt={cat.name}
+                  alt={`${cat.name} category`}
                   className="h-14 object-contain transition-transform duration-300 ease-in-out group-hover:scale-110"
                   style={{ transitionDelay: `${index * 80}ms` }}
+                  loading="lazy"
+                  width={56}
+                  height={56}
                 />
-                <span className="text-sm font-medium text-gray-700">{cat.name}</span>
+                <span className="text-sm font-medium text-gray-700 text-center">{cat.name}</span>
               </div>
             ))}
           </div>
         </div>
-        
       </div>
     </div>
   );

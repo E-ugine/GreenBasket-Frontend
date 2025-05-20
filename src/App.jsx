@@ -10,12 +10,14 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import UserProfile from './pages/UserProfile';
 import Checkout from './components/forms/CheckoutForm/Checkout';
+import Filter from './components/ui/Filters/Filter';
 
 function App() {
   return (
     <Router>
       <div className="pt-20 md:pt-24">
         <Navbar />
+        <Filter />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<ProductView />} />
