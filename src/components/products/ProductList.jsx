@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ProductCard } from './ProductCard';
 
 export const ProductList = ({ 
@@ -8,6 +9,12 @@ export const ProductList = ({
   onAddToCart = () => {},
   isAddingToCartId = null 
 }) => {
+  const navigate = useNavigate();
+
+  const handleProductClick = (productId) => {
+    navigate(`/products/${productId}`);
+  };
+
   if (error) {
     return (
       <div className="flex justify-center items-center p-8 text-red-500">
@@ -52,6 +59,7 @@ export const ProductList = ({
           isLoading={isLoading}
           onAddToCart={() => onAddToCart(product.id)}
           isAddingToCart={isAddingToCartId === product.id}
+          onClick={() => handleProductClick(product.id)}
         />
       ))}
     </div>

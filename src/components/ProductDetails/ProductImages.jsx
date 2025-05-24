@@ -1,23 +1,40 @@
-import React from "react";
+import React, { useState } from "react";
 
-export default function ProductImages() {
+export default function ProductImages({ images, name, isNew }) {
+  const [mainImage, setMainImage] = useState(images?.[0] || '');
+
+  if (!images || images.length === 0) {
+    return (
+      <div className="lg:w-1/2 bg-gray-100 flex items-center justify-center">
+        <span className="text-gray-400">No images available</span>
+      </div>
+    );
+  }
+
   return (
     <div className="lg:w-1/2">
       <div className="relative">
-        <span className="absolute top-2 left-2 bg-black text-white text-xs font-bold px-2 py-1 rounded">NEW</span>
+        {isNew && (
+          <span className="absolute top-2 left-2 bg-black text-white text-xs font-bold px-2 py-1 rounded">
+            NEW
+          </span>
+        )}
         <img 
-          src="https://i.pinimg.com/736x/9c/52/70/9c527012fe3d0383d7415543a1d6cfdc.jpg" 
-          alt="Somseng Galatero X6 Ultra" 
-          className="w-full object-contain mb-4"
+          src={mainImage} 
+          alt={name} 
+          className="w-full h-96 object-contain mb-4"
         />
       </div>
       <div className="flex gap-2 sm:gap-4 mt-4 overflow-x-auto pb-2">
-        {[1, 2, 3].map((i) => (
+        {images.map((img, i) => (
           <img 
             key={i}
-            src="https://i.pinimg.com/736x/9c/52/70/9c527012fe3d0383d7415543a1d6cfdc.jpg" 
-            alt={`Thumbnail ${i}`} 
-            className="w-16 h-16 object-cover border border-gray-200 rounded flex-shrink-0"
+            src={img} 
+            alt={`Thumbnail ${i + 1}`} 
+            className={`w-16 h-16 object-cover border rounded flex-shrink-0 cursor-pointer ${
+              mainImage === img ? 'border-blue-500' : 'border-gray-200'
+            }`}
+            onClick={() => setMainImage(img)}
           />
         ))}
       </div>

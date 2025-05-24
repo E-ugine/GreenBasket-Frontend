@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Loader2 } from 'lucide-react';
 import { Badge } from '../ui/Input/Badge';
 import { PriceDisplay } from '../ui/Input/PriceDisplay';
@@ -11,6 +12,15 @@ export const ProductCard = ({
   onAddToCart = () => {},
   isAddingToCart = false
 }) => {
+  const navigate = useNavigate();
+
+  const handleCardClick = (e) => {
+    // Don't navigate if clicking on the add to cart button or its children
+    if (!e.target.closest('.add-to-cart') && product?.id) {
+      navigate(`/products/${product.id}`);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className={`${
@@ -50,11 +60,14 @@ export const ProductCard = ({
   }
 
   return (
-    <div className={`${
-      viewType === 'grid' 
-        ? 'flex flex-col bg-white rounded-md shadow-sm relative hover:shadow-md transition-shadow'
-        : 'flex flex-col sm:flex-row bg-white rounded-md shadow-sm relative hover:shadow-md transition-shadow'
-    }`}>
+    <div 
+      className={`${
+        viewType === 'grid' 
+          ? 'flex flex-col bg-white rounded-md shadow-sm relative hover:shadow-md transition-shadow'
+          : 'flex flex-col sm:flex-row bg-white rounded-md shadow-sm relative hover:shadow-md transition-shadow'
+      } cursor-pointer`}
+      onClick={handleCardClick}
+    >
       {/* Sale badge or New badge */}
       {product.save ? (
         <div className="absolute top-2 left-2 bg-green-500 text-white text-xs font-medium py-1 px-2 rounded">
@@ -168,12 +181,15 @@ export const ProductCard = ({
         
         {/* Add to cart button */}
         <button 
-          className={`mt-4 w-full ${
+          className={`add-to-cart mt-4 w-full ${
             product.stock 
               ? 'bg-blue-500 hover:bg-blue-600' 
               : 'bg-gray-400 cursor-not-allowed'
           } text-white py-2 px-4 rounded-md flex items-center justify-center gap-2 transition-colors`}
-          onClick={onAddToCart}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddToCart();
+          }}
           disabled={!product.stock || isAddingToCart}
         >
           {isAddingToCart ? (
