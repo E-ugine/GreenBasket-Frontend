@@ -2,10 +2,12 @@ import React from 'react';
 import { StarIcon } from '@heroicons/react/24/solid';
 
 export default function RatingStars({ rating, size = 20 }) {
-  const fullStars = Math.floor(rating);
-  const hasHalfStar = rating % 1 >= 0.5;
-  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-
+  const sanitizedRating = Math.max(0, Math.min(5, Number(rating) || 0));
+  
+  const fullStars = Math.floor(sanitizedRating);
+  const hasHalfStar = sanitizedRating % 1 >= 0.5;
+  const emptyStars = Math.max(0, 5 - fullStars - (hasHalfStar ? 1 : 0));
+  
   return (
     <div className="flex items-center">
       {[...Array(fullStars)].map((_, i) => (

@@ -1,107 +1,177 @@
 const API_URL = 'https://fakestoreapi.com';
+const DEFAULT_TIMEOUT = 8000; 
+const fetchApi = async (endpoint, options = {}, retries = 3) => {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), options.timeout || DEFAULT_TIMEOUT);
 
-// Fetch all products
-export const fetchProducts = async () => {
-  const response = await fetch(`${API_URL}/products`);
-  if (!response.ok) throw new Error('Failed to fetch products');
-  return await response.json();
-};
+    try {
+      const response = await fetch(`${API_URL}/${endpoint}`, {
+        ...options,
+        signal: controller.signal
+      });
 
-// Fetch product details by ID
-export const fetchProductDetails = async (productId) => {
-  try {
-    const response = await fetch(`${API_URL}/products/${productId}`);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      clearTimeout(timeoutId);
+
+      // Handle non-2xx responses
+      if (!response.ok) {
+        // Special case for 404 - no point retrying
+        if (response.status === 404) {
+          return { error: `Resource not found: ${endpoint}` };
+        }
+        throw new Error(`HTTP ${response.status} for ${endpoint}`);
+      }
+
+      // Verify response has content
+      const text = await response.text();
+      if (!text.trim()) {
+        throw new Error('Empty response received');
+      }
+
+      return JSON.parse(text);
+
+    } catch (error) {
+      clearTimeout(timeoutId);
+      
+      if (attempt === retries) {
+        console.error(`API call failed after ${retries} attempts: ${endpoint}`, error);
+        return { error: error.message };
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
     }
-    
-    // Check if response has content
-    const contentLength = response.headers.get('content-length');
-    if (contentLength === '0') {
-      throw new Error('Empty response from server');
-    }
-    
-    const product = await response.json();
-    
-    if (!product) {
-      throw new Error('No product data received');
-    }
-    
-    // Transform the data to match the frontend requirements
-    return {
-      ...product,
-      images: product.image ? [product.image] : ['/placeholder-image.jpg'],
-      isNew: Math.random() > 0.5,
-      inStock: true,
-      colors: ['Black', 'White', 'Blue', 'Red'].slice(0, Math.floor(Math.random() * 4) + 1),
-      memorySizes: ['64GB', '128GB', '256GB'].slice(0, Math.floor(Math.random() * 3) + 1)
-    };
-    
-  } catch (error) {
-    console.error('Error fetching product details:', error);
-    // Return a fallback product if the API fails
-    return {
-      id: productId,
-      name: 'Product Not Available',
-      price: 0,
-      description: 'This product is currently not available.',
-      category: 'unknown',
-      images: ['/placeholder-image.jpg'],
-      isNew: false,
-      inStock: false,
-      colors: [],
-      memorySizes: []
-    };
   }
 };
 
-// categories
-export const fetchCategories = async () => {
-  const response = await fetch(`${API_URL}/products/categories`);
-  if (!response.ok) throw new Error('Failed to fetch categories');
-  const categories = await response.json();
-  return categories.map((category, index) => ({
-    id: index + 1,
-    name: category
-  }));
+// Transform API product to our frontend format
+const transformProduct = (apiProduct) => {
+  if (!apiProduct || typeof apiProduct !== 'object') {
+    return null;
+  }
+
+  return {
+    id: apiProduct.id,
+    name: apiProduct.title,
+    price: apiProduct.price,
+    description: apiProduct.description,
+    category: apiProduct.category,
+    image: [apiProduct.image].filter(Boolean), 
+    rating: apiProduct.rating,
+    isNew: Math.random() > 0.7, // 30% chance of being "new"
+    inStock: true, // Assume in stock unless API says otherwise
+    colors: generateRandomColors(),
+    memorySizes: generateRandomMemorySizes()
+  };
 };
 
-// Fetch frequently bought together items 
-export const fetchFrequentlyBoughtTogether = async (productId) => {
-  const response = await fetch(`${API_URL}/products`);
-  if (!response.ok) throw new Error('Failed to fetch products');
-  const allProducts = await response.json();
+const generateRandomColors = () => {
+  const allColors = ['Black', 'White', 'Blue', 'Red', 'Green', 'Gray'];
+  return allColors.slice(0, Math.floor(Math.random() * allColors.length) + 1);
+};
+
+const generateRandomMemorySizes = () => {
+  const allSizes = ['64GB', '128GB', '256GB', '512GB', '1TB'];
+  return allSizes.slice(0, Math.floor(Math.random() * 2) + 1); 
+};
+
+const createFallbackProduct = (productId) => ({
+  id: productId || 'unknown',
+  name: 'Product Not Available',
+  price: 0,
+  description: 'This product is currently unavailable.',
+  category: 'unavailable',
+  images: ['/placeholder-product.jpg'],
+  rating: { rate: 0, count: 0 },
+  isNew: false,
+  inStock: false,
+  colors: [],
+  memorySizes: []
+});
+
+
+export const fetchProductDetails = async (productId) => {
+  if (!productId) {
+    console.warn('fetchProductDetails called without productId');
+    return createFallbackProduct();
+  }
+
+  const result = await fetchApi(`products/${productId}`);
+
+  if (result.error) {
+    console.error(`Failed to fetch product ${productId}:`, result.error);
+    return createFallbackProduct(productId);
+  }
+
+  const transformed = transformProduct(result);
+  return transformed || createFallbackProduct(productId);
+};
+
+export const fetchProducts = async () => {
+  const result = await fetchApi('products');
   
-  return allProducts
-    .filter(product => product.id !== productId)
-    .sort(() => 0.5 - Math.random())
-    .slice(0, 4)
-    .map(product => ({
-      id: product.id,
-      name: product.title,
-      price: product.price,
-      image: product.image
-    }));
+  if (result.error) {
+    console.error('Failed to fetch products:', result.error);
+    return [];
+  }
+
+  return Array.isArray(result) 
+    ? result.map(p => transformProduct(p)).filter(Boolean)
+    : [];
+};
+
+export const fetchCategories = async () => {
+  const result = await fetchApi('products/categories');
+  
+  if (result.error) {
+    console.error('Failed to fetch categories:', result.error);
+    return [
+      { id: 1, name: 'electronics' },
+      { id: 2, name: 'jewelery' },
+      { id: 3, name: "men's clothing" },
+      { id: 4, name: "women's clothing" }
+    ];
+  }
+
+  return Array.isArray(result)
+    ? result.map((name, index) => ({ id: index + 1, name }))
+    : [];
+};
+// Fetch frequently bought together items
+export const fetchFrequentlyBoughtTogether = async (productId) => {
+  try {
+    const response = await fetchWithRetry(`${API_URL}/products`);
+    const allProducts = await response.json();
+    
+    return allProducts
+      .filter(product => product.id !== productId)
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 4)
+      .map(product => ({
+        id: product.id,
+        name: product.title,
+        price: product.price,
+        image: product.image
+      }));
+  } catch (error) {
+    console.error('Error fetching frequently bought together items:', error);
+    return [];
+  }
 };
 
 // Fetch related products
 export const fetchRelatedProducts = async (currentProductId, category) => {
   try {
     // First try to get products from the same category
-    const response = await fetch(`${API_URL}/products/category/${encodeURIComponent(category)}`);
-    if (!response.ok) throw new Error('Failed to fetch category products');
+    const response = await fetchWithRetry(
+      `${API_URL}/products/category/${encodeURIComponent(category)}`
+    );
     
     let products = await response.json();
-    
-    // Filter out the current product
     products = products.filter(product => product.id !== currentProductId);
-    
+
     // If we don't have enough products, fetch some random ones
     if (products.length < 4) {
-      const allResponse = await fetch(`${API_URL}/products`);
-      if (!allResponse.ok) throw new Error('Failed to fetch all products');
-      
+      const allResponse = await fetchWithRetry(`${API_URL}/products`);
       const allProducts = await allResponse.json();
       const additionalProducts = allProducts
         .filter(p => p.id !== currentProductId && !products.some(prod => prod.id === p.id))
@@ -110,8 +180,7 @@ export const fetchRelatedProducts = async (currentProductId, category) => {
       
       products = [...products, ...additionalProducts];
     }
-    
-    // Return maximum 5 related products
+
     return products
       .slice(0, 5)
       .map(product => ({
@@ -123,21 +192,6 @@ export const fetchRelatedProducts = async (currentProductId, category) => {
       }));
   } catch (error) {
     console.error('Error fetching related products:', error);
-    // Fallback: return some random products
-    const response = await fetch(`${API_URL}/products`);
-    if (!response.ok) throw error; // Re-throw original error if this fails
-    
-    const allProducts = await response.json();
-    return allProducts
-      .filter(product => product.id !== currentProductId)
-      .sort(() => 0.5 - Math.random())
-      .slice(0, 5)
-      .map(product => ({
-        id: product.id,
-        name: product.title,
-        price: product.price,
-        image: product.image,
-        category: product.category
-      }));
+    return [];
   }
 };
