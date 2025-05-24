@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Heart } from "lucide-react";
-import { fetchProducts, fetchCategories } from '../../services/apiData';
 import { fetchFrequentlyBoughtTogether } from "../../services/apiData";
 import LoadingSpinner from "./LoadingSpinner";
 
@@ -19,6 +18,12 @@ export default function FrequentlyBoughtTogether({ productId }) {
   }, [items, selectedItems]);
 
   useEffect(() => {
+    // Don't fetch if productId is not available
+    if (!productId) {
+      setLoading(false);
+      return;
+    }
+
     const loadData = async () => {
       try {
         setLoading(true);
@@ -58,6 +63,9 @@ export default function FrequentlyBoughtTogether({ productId }) {
     alert(`Added ${selectedItems.length} items to wishlist`);
   };
 
+  // Don't render anything if no productId
+  if (!productId) return null;
+  
   if (loading) return <LoadingSpinner />;
   if (error) return <div className="text-red-500 p-4 text-center">{error}</div>;
   if (items.length === 0) return null;

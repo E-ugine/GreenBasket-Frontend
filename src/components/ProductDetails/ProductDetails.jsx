@@ -11,7 +11,33 @@ import PromotionalBanners from "./PromotionalBanners";
 import RelatedProducts from "./RelatedProducts";
 import { fetchProductDetails } from "../../services/apiData";
 import LoadingSpinner from "./LoadingSpinner";
-import NotFoundPage from "./NotFoundPage";
+import NoteFoundPage from "./NotFoundPage";
+
+const createFallbackProduct = (productId = null) => {
+  return {
+    id: productId || 'fallback-product',
+    name: 'Product Not Available',
+    price: 0,
+    originalPrice: 0,
+    discount: 0,
+    images: [
+      {
+        url: '/placeholder-product-image.jpg',
+        alt: 'Product image not available'
+      }
+    ],
+    colors: [],
+    memorySizes: [],
+    inStock: false,
+    isNew: false,
+    category: '',
+    description: 'This product is currently unavailable.',
+    specifications: {},
+    reviews: [],
+    rating: 0,
+    stockCount: 0
+  };
+};
 
 export default function ProductDetails() {
   const { productId } = useParams();
@@ -70,9 +96,7 @@ export default function ProductDetails() {
   
   if (error && !product) {
     return (
-      <ErrorMessage 
-        title="Product not found"
-        message="We're sorry, but the product you're looking for is not available."
+      <NoteFoundPage 
       />
     );
   }
@@ -107,6 +131,7 @@ export default function ProductDetails() {
               incrementQuantity={incrementQuantity}
               decrementQuantity={decrementQuantity}
               price={product.price}
+              originalPrice={product.originalPrice}
               inStock={product.inStock}
             />
           </>
@@ -126,11 +151,17 @@ export default function ProductDetails() {
             incrementQuantity={incrementQuantity}
             decrementQuantity={decrementQuantity}
             price={product.price}
+            originalPrice={product.originalPrice}
             inStock={product.inStock}
           />
           
           <FrequentlyBoughtTogether productId={productId} />
-          <ProductTabs product={product} />
+          <ProductTabs 
+            product={product} 
+            description={product.description}
+            specifications={product.specifications}
+            reviews={product.reviews}
+          />
           <PromotionalBanners />
           <RelatedProducts 
             currentProductId={productId} 

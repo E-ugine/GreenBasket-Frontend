@@ -9,7 +9,7 @@ const fetchApi = async (endpoint, options = {}, retries = 3) => {
     try {
       const response = await fetch(`${API_URL}/${endpoint}`, {
         ...options,
-        signal: controller.signal
+        signal: options.signal || controller.signal
       });
 
       clearTimeout(timeoutId);
@@ -49,14 +49,26 @@ const transformProduct = (apiProduct) => {
     id: apiProduct.id,
     name: apiProduct.title,
     price: apiProduct.price,
+    originalPrice: Math.round(apiProduct.price * 1.2), // Add originalPrice
+    discount: Math.round(((apiProduct.price * 1.2) - apiProduct.price) / (apiProduct.price * 1.2) * 100),
     description: apiProduct.description,
     category: apiProduct.category,
-    image: [apiProduct.image].filter(Boolean),
-    rating: apiProduct.rating,
+    images: [{ // Transform to expected format
+      url: apiProduct.image,
+      alt: apiProduct.title || 'Product image'
+    }],
+    rating: apiProduct.rating?.rate || 0,
+    stockCount: Math.floor(Math.random() * 50) + 10, // Random stock count
     isNew: Math.random() > 0.7,
     inStock: true,
     colors: generateRandomColors(),
-    memorySizes: generateRandomMemorySizes()
+    memorySizes: generateRandomMemorySizes(),
+    specifications: {
+      'Brand': 'Generic',
+      'Model': `Model-${apiProduct.id}`,
+      'Category': apiProduct.category
+    },
+    reviews: [] // Initialize empty reviews array
   };
 };
 
@@ -74,23 +86,31 @@ const createFallbackProduct = (productId = 'unknown') => ({
   id: productId,
   name: 'Product Not Available',
   price: 0,
+  originalPrice: 0,
+  discount: 0,
   description: 'This product is currently unavailable.',
   category: 'unavailable',
-  images: ['/placeholder-product.jpg'],
-  rating: { rate: 0, count: 0 },
+  images: [{ 
+    url: '/placeholder-product.jpg',
+    alt: 'Product not available'
+  }],
+  rating: 0,
+  stockCount: 0,
   isNew: false,
   inStock: false,
   colors: [],
-  memorySizes: []
+  memorySizes: [],
+  specifications: {},
+  reviews: []
 });
 
-export const fetchProductDetails = async (productId) => {
+export const fetchProductDetails = async (productId, options = {}) => {
   if (!productId) {
     console.warn('fetchProductDetails called without productId');
     return createFallbackProduct();
   }
 
-  const result = await fetchApi(`products/${productId}`);
+  const result = await fetchApi(`products/${productId}`, options);
 
   if (result.error) {
     console.error(`Failed to fetch product ${productId}:`, result.error);
@@ -101,8 +121,8 @@ export const fetchProductDetails = async (productId) => {
   return transformed || createFallbackProduct(productId);
 };
 
-export const fetchProducts = async () => {
-  const result = await fetchApi('products');
+export const fetchProducts = async (options = {}) => {
+  const result = await fetchApi('products', options);
   
   if (result.error) {
     console.error('Failed to fetch products:', result.error);
@@ -114,8 +134,8 @@ export const fetchProducts = async () => {
     : [];
 };
 
-export const fetchCategories = async () => {
-  const result = await fetchApi('products/categories');
+export const fetchCategories = async (options = {}) => {
+  const result = await fetchApi('products/categories', options);
   
   if (result.error) {
     console.error('Failed to fetch categories:', result.error);
@@ -130,16 +150,17 @@ export const fetchCategories = async () => {
   return Array.isArray(result)
     ? result.map((name, index) => ({ id: index + 1, name }))
     : [];
-}
-export const fetchFrequentlyBoughtTogether = async (productId) => {
+};
+
+export const fetchFrequentlyBoughtTogether = async (productId, options = {}) => {
   try {
     // First get the current product's category
-    const product = await fetchProductDetails(productId);
+    const product = await fetchProductDetails(productId, options);
     
     // Then get all products in the same category
-    const allProducts = await fetchProducts();
+    const allProducts = await fetchProducts(options);
     const sameCategoryProducts = allProducts.filter(
-      p => p.category === product.category && p.id !== productId
+      p => p.category === product.category && p.id !== parseInt(productId)
     );
     
     // Return 3-5 random products from the same category
@@ -148,7 +169,7 @@ export const fetchFrequentlyBoughtTogether = async (productId) => {
       id: item.id,
       name: item.name,
       price: item.price,
-      image: item.images?.[0] || '/placeholder-product.jpg'
+      image: item.images?.[0]?.url || '/placeholder-product.jpg'
     }));
   } catch (error) {
     console.error('Error fetching frequently bought together items:', error);
@@ -175,16 +196,17 @@ export const fetchFrequentlyBoughtTogether = async (productId) => {
       }
     ];
   }
-}
-export const fetchRelatedProducts = async (productId) => {
+};
+
+export const fetchRelatedProducts = async (productId, options = {}) => {
   try {
     // First get the current product's category
-    const product = await fetchProductDetails(productId);
+    const product = await fetchProductDetails(productId, options);
     
     // Then get all products in the same category
-    const allProducts = await fetchProducts();
+    const allProducts = await fetchProducts(options);
     const sameCategoryProducts = allProducts.filter(
-      p => p.category === product.category && p.id !== productId
+      p => p.category === product.category && p.id !== parseInt(productId)
     );
     
     // Return 4-6 random products from the same category
@@ -193,7 +215,7 @@ export const fetchRelatedProducts = async (productId) => {
       id: item.id,
       name: item.name,
       price: item.price,
-      image: item.images?.[0] || '/placeholder-product.jpg',
+      image: item.images?.[0]?.url || '/placeholder-product.jpg',
       rating: item.rating
     }));
   } catch (error) {
@@ -206,28 +228,28 @@ export const fetchRelatedProducts = async (productId) => {
         name: 'Wireless Earbuds',
         price: 79.99,
         image: '/placeholder-product.jpg',
-        rating: { rate: 4.5, count: 120 }
+        rating: 4.5
       },
       {
         id: 2,
         name: 'Bluetooth Speaker',
         price: 49.99,
         image: '/placeholder-product.jpg',
-        rating: { rate: 4.2, count: 85 }
+        rating: 4.2
       },
       {
         id: 3,
         name: 'Smart Watch',
         price: 129.99,
         image: '/placeholder-product.jpg',
-        rating: { rate: 4.7, count: 210 }
+        rating: 4.7
       },
       {
         id: 4,
         name: 'Tablet Stand',
         price: 19.99,
         image: '/placeholder-product.jpg',
-        rating: { rate: 4.0, count: 65 }
+        rating: 4.0
       }
     ];
   }
