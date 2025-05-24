@@ -9,7 +9,7 @@ import RecentlyViewedProducts from '../components/ui/Filters/RecentlyViewedProdu
 export default function Home() {
     return (
         <div className=" ">
-        <div className="w-screen overflow-x-hidden">
+        <div className="w-full ">
            <Hero />
            <FeaturedSection />
               <Deals />
