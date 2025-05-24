@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { FaFacebookF, FaInstagram, FaYoutube, FaPinterestP, FaTwitter } from 'react-icons/fa';
 import { IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
 
-
 import mpesaIcon from '/images/mpesa.png';
 import paypalIcon from '/images/paypal.png';
 import mastercardIcon from '/images/mastercard.png';
@@ -94,8 +93,8 @@ const Footer = () => {
   );
 
   return (
-    <footer className="bg-white w-full text-black px-4 sm:px-6 py-12 mt-20 border-t text-sm">
-      <div className="max-w-7xl mx-auto">
+    <footer className="bg-white w-full text-black px-4 sm:px-6 py-12 mt-20 border-t text-sm items-start text-left">
+      <div className="w-full px-4 sm:px-6 lg:px-8 mx-auto">
         {/* Mobile view - Accordion style */}
         <div className="md:hidden space-y-2">
           {/* Left section */}
@@ -129,7 +128,7 @@ const Footer = () => {
         </div>
 
         {/* Desktop view - Grid layout */}
-        <div className="hidden md:grid md:grid-cols-5 md:gap-8 lg:gap-10">
+        <div className="hidden md:grid md:grid-cols-5 md:gap-8 lg:gap-10 max-w-7xl mx-auto">
           {/* Left section */}
           <div className="col-span-2">
             <h2 className="font-bold text-lg mb-3">GreenBasket - TECH ONLINE MARKET</h2>
@@ -187,7 +186,7 @@ const Footer = () => {
         </div>
 
         {/* Bottom Footer */}
-        <div className="flex flex-col md:flex-row justify-between items-center mt-10 pt-6 border-t text-xs text-gray-600">
+        <div className="flex flex-col md:flex-row justify-between items-center mt-10 pt-6 border-t text-xs text-gray-600 max-w-7xl mx-auto">
           <p className="mb-4 md:mb-0 text-center md:text-left">
             © 2025 <span className="font-bold text-black">GreenBasket</span>. All Rights Reserved
           </p>
