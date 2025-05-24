@@ -1,5 +1,6 @@
 const API_URL = 'https://fakestoreapi.com';
-const DEFAULT_TIMEOUT = 8000; 
+const DEFAULT_TIMEOUT = 8000;
+
 const fetchApi = async (endpoint, options = {}, retries = 3) => {
   for (let attempt = 1; attempt <= retries; attempt++) {
     const controller = new AbortController();
@@ -13,23 +14,19 @@ const fetchApi = async (endpoint, options = {}, retries = 3) => {
 
       clearTimeout(timeoutId);
 
-      // Handle non-2xx responses
       if (!response.ok) {
-        // Special case for 404 - no point retrying
         if (response.status === 404) {
           return { error: `Resource not found: ${endpoint}` };
         }
         throw new Error(`HTTP ${response.status} for ${endpoint}`);
       }
 
-      // Verify response has content
       const text = await response.text();
       if (!text.trim()) {
         throw new Error('Empty response received');
       }
 
       return JSON.parse(text);
-
     } catch (error) {
       clearTimeout(timeoutId);
       
@@ -43,7 +40,6 @@ const fetchApi = async (endpoint, options = {}, retries = 3) => {
   }
 };
 
-// Transform API product to our frontend format
 const transformProduct = (apiProduct) => {
   if (!apiProduct || typeof apiProduct !== 'object') {
     return null;
@@ -55,10 +51,10 @@ const transformProduct = (apiProduct) => {
     price: apiProduct.price,
     description: apiProduct.description,
     category: apiProduct.category,
-    image: [apiProduct.image].filter(Boolean), 
+    image: [apiProduct.image].filter(Boolean),
     rating: apiProduct.rating,
-    isNew: Math.random() > 0.7, // 30% chance of being "new"
-    inStock: true, // Assume in stock unless API says otherwise
+    isNew: Math.random() > 0.7,
+    inStock: true,
     colors: generateRandomColors(),
     memorySizes: generateRandomMemorySizes()
   };
@@ -71,11 +67,11 @@ const generateRandomColors = () => {
 
 const generateRandomMemorySizes = () => {
   const allSizes = ['64GB', '128GB', '256GB', '512GB', '1TB'];
-  return allSizes.slice(0, Math.floor(Math.random() * 2) + 1); 
+  return allSizes.slice(0, Math.floor(Math.random() * 2) + 1);
 };
 
-const createFallbackProduct = (productId) => ({
-  id: productId || 'unknown',
+const createFallbackProduct = (productId = 'unknown') => ({
+  id: productId,
   name: 'Product Not Available',
   price: 0,
   description: 'This product is currently unavailable.',
@@ -87,7 +83,6 @@ const createFallbackProduct = (productId) => ({
   colors: [],
   memorySizes: []
 });
-
 
 export const fetchProductDetails = async (productId) => {
   if (!productId) {
@@ -135,63 +130,105 @@ export const fetchCategories = async () => {
   return Array.isArray(result)
     ? result.map((name, index) => ({ id: index + 1, name }))
     : [];
-};
-// Fetch frequently bought together items
+}
 export const fetchFrequentlyBoughtTogether = async (productId) => {
   try {
-    const response = await fetchWithRetry(`${API_URL}/products`);
-    const allProducts = await response.json();
+    // First get the current product's category
+    const product = await fetchProductDetails(productId);
     
-    return allProducts
-      .filter(product => product.id !== productId)
-      .sort(() => 0.5 - Math.random())
-      .slice(0, 4)
-      .map(product => ({
-        id: product.id,
-        name: product.title,
-        price: product.price,
-        image: product.image
-      }));
-  } catch (error) {
-    console.error('Error fetching frequently bought together items:', error);
-    return [];
-  }
-};
-
-// Fetch related products
-export const fetchRelatedProducts = async (currentProductId, category) => {
-  try {
-    // First try to get products from the same category
-    const response = await fetchWithRetry(
-      `${API_URL}/products/category/${encodeURIComponent(category)}`
+    // Then get all products in the same category
+    const allProducts = await fetchProducts();
+    const sameCategoryProducts = allProducts.filter(
+      p => p.category === product.category && p.id !== productId
     );
     
-    let products = await response.json();
-    products = products.filter(product => product.id !== currentProductId);
-
-    // If we don't have enough products, fetch some random ones
-    if (products.length < 4) {
-      const allResponse = await fetchWithRetry(`${API_URL}/products`);
-      const allProducts = await allResponse.json();
-      const additionalProducts = allProducts
-        .filter(p => p.id !== currentProductId && !products.some(prod => prod.id === p.id))
-        .sort(() => 0.5 - Math.random())
-        .slice(0, 5 - products.length);
-      
-      products = [...products, ...additionalProducts];
-    }
-
-    return products
-      .slice(0, 5)
-      .map(product => ({
-        id: product.id,
-        name: product.title,
-        price: product.price,
-        image: product.image,
-        category: product.category
-      }));
+    // Return 3-5 random products from the same category
+    const shuffled = sameCategoryProducts.sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 3 + Math.floor(Math.random() * 2)).map(item => ({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      image: item.images?.[0] || '/placeholder-product.jpg'
+    }));
+  } catch (error) {
+    console.error('Error fetching frequently bought together items:', error);
+    
+    // Fallback: return some default products if the API fails
+    return [
+      {
+        id: 1,
+        name: 'Wireless Headphones',
+        price: 59.99,
+        image: '/placeholder-product.jpg'
+      },
+      {
+        id: 2,
+        name: 'Phone Case',
+        price: 12.99,
+        image: '/placeholder-product.jpg'
+      },
+      {
+        id: 3,
+        name: 'Screen Protector',
+        price: 8.99,
+        image: '/placeholder-product.jpg'
+      }
+    ];
+  }
+}
+export const fetchRelatedProducts = async (productId) => {
+  try {
+    // First get the current product's category
+    const product = await fetchProductDetails(productId);
+    
+    // Then get all products in the same category
+    const allProducts = await fetchProducts();
+    const sameCategoryProducts = allProducts.filter(
+      p => p.category === product.category && p.id !== productId
+    );
+    
+    // Return 4-6 random products from the same category
+    const shuffled = sameCategoryProducts.sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 4 + Math.floor(Math.random() * 2)).map(item => ({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      image: item.images?.[0] || '/placeholder-product.jpg',
+      rating: item.rating
+    }));
   } catch (error) {
     console.error('Error fetching related products:', error);
-    return [];
+    
+    // Fallback: return some default products if the API fails
+    return [
+      {
+        id: 1,
+        name: 'Wireless Earbuds',
+        price: 79.99,
+        image: '/placeholder-product.jpg',
+        rating: { rate: 4.5, count: 120 }
+      },
+      {
+        id: 2,
+        name: 'Bluetooth Speaker',
+        price: 49.99,
+        image: '/placeholder-product.jpg',
+        rating: { rate: 4.2, count: 85 }
+      },
+      {
+        id: 3,
+        name: 'Smart Watch',
+        price: 129.99,
+        image: '/placeholder-product.jpg',
+        rating: { rate: 4.7, count: 210 }
+      },
+      {
+        id: 4,
+        name: 'Tablet Stand',
+        price: 19.99,
+        image: '/placeholder-product.jpg',
+        rating: { rate: 4.0, count: 65 }
+      }
+    ];
   }
 };

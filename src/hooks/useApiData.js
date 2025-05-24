@@ -22,13 +22,14 @@ export const useApiData = () => {
           id: product.id,
           name: product.title,
           price: product.price,
+          description: product.description,
           originalPrice: Math.round(product.price * 1.2),
           image: product.image,
           stock: 1,
           shipping: 'FREE SHIPPING',
           reviews: Math.floor(Math.random() * 100),
           isNew: Math.random() > 0.7,
-          gift: Math.random() > 0.8
+          gift: Math.random() > 0.3
         }));
 
         setProducts(transformedProducts);

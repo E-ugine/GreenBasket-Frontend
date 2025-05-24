@@ -7,11 +7,13 @@ export default function DesktopSidePanel({
   quantity,
   incrementQuantity,
   decrementQuantity,
+  price,
+  inStock
 }) {
   return (
-    <div className="fixed top-20 right-4 lg:right-20 bg-gray-100 p-4 rounded-lg w-64 hidden lg:block">
+    <div className="sticky top-4 h-fit bg-gray-100 p-4 rounded-lg w-64 hidden lg:block self-start">
       <div className="text-sm text-gray-500 mb-1">TOTAL PRICE:</div>
-      <div className="text-3xl font-bold mb-4">$609.00</div>
+      <div className="text-3xl font-bold mb-4">${price.toFixed(2)}</div>
 
       <div className="flex items-center gap-1 mb-4">
         <img
@@ -19,14 +21,14 @@ export default function DesktopSidePanel({
           alt="Affirm"
           className="h-5"
         />
-        <span className="text-red-500">$49/m</span>
+        <span className="text-red-500">${(price/12).toFixed(2)}/mo</span>
         <span className="text-sm">in 12 months.</span>
         <a href="#" className="text-blue-500 text-sm">See more</a>
       </div>
 
-      <div className="flex items-center gap-2 text-green-600 mb-6">
+      <div className={`flex items-center gap-2 ${inStock ? 'text-green-600' : 'text-red-600'} mb-6`}>
         <CheckCircle size={16} />
-        <span>In stock</span>
+        <span>{inStock ? 'In stock' : 'Out of stock'}</span>
       </div>
 
       <QuantitySelector
@@ -35,16 +37,19 @@ export default function DesktopSidePanel({
         decrementQuantity={decrementQuantity}
       />
 
-      <AddToCartButton />
+      <AddToCartButton disabled={!inStock} />
 
-      <button className="w-full bg-orange-400 text-white py-3 rounded-md font-bold mb-4 flex items-center justify-center gap-2">
+      <button 
+        className={`w-full ${inStock ? 'bg-orange-400' : 'bg-gray-400'} text-white py-3 rounded-md font-bold mb-4 flex items-center justify-center gap-2`}
+        disabled={!inStock}
+      >
         BUY WITH PayPal
       </button>
 
       <div className="flex items-center justify-between mb-4">
         <button className="flex items-center gap-1 text-gray-600">
           <Heart size={16} />
-          <span>Wishlist added</span>
+          <span>Add to Wishlist</span>
         </button>
         <button className="flex items-center gap-1 text-gray-600">
           <span>Compare</span>

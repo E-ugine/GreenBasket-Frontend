@@ -8,10 +8,9 @@ import MemorySelector from "./MemorySelector";
 export default function ProductInfo({
   product,
   selectedColor,
-  setSelectedColor,
+  onSelectColor,
   selectedMemory,
-  setSelectedMemory,
-  quantity
+  onSelectMemory
 }) {
   const {
     name,
@@ -20,8 +19,8 @@ export default function ProductInfo({
     rating,
     ratingCount,
     description,
-    colors,
-    memorySizes,
+    colors = [],
+    memorySizes = [],
     sku,
     category,
     brand,
@@ -53,20 +52,20 @@ export default function ProductInfo({
       
       <p className="mb-6">{description}</p>
       
-      {colors && colors.length > 0 && (
+      {colors.length > 0 && (
         <ColorSelector 
           colors={colors}
           selectedColor={selectedColor}
-          onSelectColor={setSelectedColor}
+          onSelectColor={onSelectColor}
           className="mb-6"
         />
       )}
       
-      {memorySizes && memorySizes.length > 0 && (
+      {memorySizes.length > 0 && (
         <MemorySelector 
           sizes={memorySizes}
           selectedSize={selectedMemory}
-          onSelectSize={setSelectedMemory}
+          onSelectSize={onSelectMemory}
           className="mb-6"
         />
       )}

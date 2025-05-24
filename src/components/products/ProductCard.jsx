@@ -10,14 +10,15 @@ export const ProductCard = ({
   viewType = 'grid',
   isLoading = false,
   onAddToCart = () => {},
-  isAddingToCart = false
+  isAddingToCart = false,
+  onClick = null
 }) => {
   const navigate = useNavigate();
 
   const handleCardClick = (e) => {
     // Don't navigate if clicking on the add to cart button or its children
     if (!e.target.closest('.add-to-cart') && product?.id) {
-      navigate(`/products/${product.id}`);
+      onClick ? onClick() : navigate(`/products/${product.id}`);
     }
   };
 
@@ -63,7 +64,7 @@ export const ProductCard = ({
     <div 
       className={`${
         viewType === 'grid' 
-          ? 'flex flex-col bg-white rounded-md shadow-sm relative hover:shadow-md transition-shadow'
+          ? 'flex flex-col bg-white rounded-md shadow-sm relative hover:shadow-md transition-shadow h-full'
           : 'flex flex-col sm:flex-row bg-white rounded-md shadow-sm relative hover:shadow-md transition-shadow'
       } cursor-pointer`}
       onClick={handleCardClick}
@@ -93,7 +94,7 @@ export const ProductCard = ({
         <img 
           src={product.image} 
           alt={product.name}
-          className="h-36 w-auto object-contain"
+          className={`${viewType === 'grid' ? 'h-36' : 'h-48'} w-auto object-contain`}
           loading="lazy"
           onError={(e) => {
             e.target.src = 'https://via.placeholder.com/150?text=No+Image';
@@ -117,9 +118,18 @@ export const ProductCard = ({
           </div>
         )}
         
-        <h3 className="text-sm font-medium mb-2 flex-grow line-clamp-2">
+        <h3 className="text-sm font-medium mb-1 line-clamp-2">
           {product.name}
         </h3>
+        
+        {/* Product description - different styling for grid vs list */}
+        <p className={`${
+          viewType === 'grid' 
+            ? 'text-xs text-gray-600 mb-2 line-clamp-2' 
+            : 'text-sm text-gray-700 mb-3 line-clamp-3'
+        }`}>
+          {product.description || 'No description available'}
+        </p>
         
         {/* Price display */}
         <div className="mb-2">
@@ -154,29 +164,6 @@ export const ProductCard = ({
           <Badge type="info" text="Contact" />
         ) : (
           <Badge type="error" text="Out of stock" />
-        )}
-        
-        {/* Alternative options */}
-        {product.alternatives && product.alternatives.length > 0 && (
-          <div className="mt-2 flex gap-2">
-            {product.alternatives.slice(0, 3).map((alt, idx) => (
-              <img 
-                key={idx}
-                src={alt}
-                alt="Product variant"
-                className="w-8 h-8 border border-gray-300 rounded-sm object-cover"
-                loading="lazy"
-                onError={(e) => {
-                  e.target.src = 'https://via.placeholder.com/32?text=Alt';
-                }}
-              />
-            ))}
-            {product.alternatives.length > 3 && (
-              <div className="w-8 h-8 border border-gray-300 rounded-sm flex items-center justify-center text-xs bg-gray-100">
-                +{product.alternatives.length - 3}
-              </div>
-            )}
-          </div>
         )}
         
         {/* Add to cart button */}
