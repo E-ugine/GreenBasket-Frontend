@@ -1,10 +1,11 @@
 import React from 'react';
 import { ChevronDown, Search, Star } from 'lucide-react';
 import { useProductFilters } from '../../hooks/useProductFilters';
-import { categories } from '../../data/products';
+import { useApiData } from '../../hooks/useApiData';
 import { brands, ratings, screenSizes } from '../../data/filters';
 
 export const ProductFilters = () => {
+  const { categories, loading, error } = useApiData();
   const {
     activeCategory,
     setActiveCategory,
@@ -22,18 +23,33 @@ export const ProductFilters = () => {
     setShowSidebar
   } = useProductFilters();
 
+  if (loading) return (
+    <div className={`${showSidebar ? 'block' : 'hidden'} lg:block lg:w-1/4 p-4 bg-gray-100`}>
+      <div className="animate-pulse space-y-4">
+        <div className="h-6 bg-gray-300 rounded w-3/4"></div>
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="h-10 bg-gray-200 rounded"></div>
+        ))}
+      </div>
+    </div>
+  );
+
+  if (error) return (
+    <div className={`${showSidebar ? 'block' : 'hidden'} lg:block lg:w-1/4 p-4 bg-gray-100 text-red-500`}>
+      Error loading categories: {error}
+    </div>
+  );
+
   return (
     <div className={`${showSidebar ? 'block' : 'hidden'} lg:block lg:w-1/4 p-4 bg-gray-100`}>
-      {/* Categories section */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-bold">CATEGORIES</h2>
           <button className="text-gray-500 text-sm hover:text-blue-600">Reset All</button>
         </div>
         
-        {/* Main categories */}
         <div className="space-y-2">
-          {categories.map((category) => (
+          {categories?.map((category) => (
             <div key={category.id} className="space-y-2">
               <button 
                 className={`w-full px-4 py-2 text-left rounded-md ${
@@ -49,7 +65,6 @@ export const ProductFilters = () => {
                 </div>
               </button>
               
-              {/* Subcategories */}
               {category.subcategories && activeCategory === category.name && (
                 <div className="ml-2 space-y-1">
                   {category.subcategories.map((subcat, idx) => (
@@ -67,7 +82,6 @@ export const ProductFilters = () => {
         </div>
       </div>
       
-      {/* Brands section */}
       <div className="mb-6">
         <h2 className="text-lg font-bold mb-4">By Brands</h2>
         <div className="mb-4">
@@ -100,7 +114,6 @@ export const ProductFilters = () => {
         </div>
       </div>
       
-      {/* Price filter */}
       <div className="mb-6">
         <h2 className="text-lg font-bold mb-4">By Price</h2>
         <div className="mb-4">
@@ -137,7 +150,6 @@ export const ProductFilters = () => {
         </div>
       </div>
       
-      {/* Rating filter */}
       <div className="mb-6">
         <h2 className="text-lg font-bold mb-4">By Rating</h2>
         <div className="space-y-2">
@@ -167,7 +179,6 @@ export const ProductFilters = () => {
         </div>
       </div>
       
-      {/* Screen Size filter */}
       <div className="mb-6">
         <h2 className="text-lg font-bold mb-4">By Screen Size</h2>
         <div className="flex flex-wrap gap-2">
@@ -187,7 +198,6 @@ export const ProductFilters = () => {
         </div>
       </div>
       
-      {/* Mobile close button */}
       <div className="lg:hidden flex justify-center">
         <button 
           onClick={() => setShowSidebar(false)}

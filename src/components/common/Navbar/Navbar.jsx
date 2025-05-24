@@ -9,12 +9,7 @@ const NAV_LINKS = [
   { name: 'Contact', path: '/contact', aria: 'Contact our support team' }
 ];
 
-const PAGES_DROPDOWN = [
-  { name: 'Login', path: '/login', aria: 'Go to login page' },
-  { name: 'Register', path: '/register', aria: 'Go to registration page' },
-  { name: 'Cart', path: '/cart', aria: 'View your shopping cart' },
-  { name: 'Wishlist', path: '/wishlist', aria: 'View your saved items' }
-];
+
 
 const TopBarInfo = () => (
   <div className="hidden sm:flex items-center">
@@ -191,38 +186,7 @@ const Navbar = () => {
                 {link.name}
               </NavLink>
             ))}
-
-            {/* Pages dropdown */}
-            <div className="relative" ref={dropdownRef}>
-              <button 
-                onClick={() => toggleDropdown('pages')}
-                aria-expanded={dropdownOpen.pages}
-                aria-haspopup="true"
-                aria-label="Pages menu"
-                className="text-gray-800 text-sm flex items-center font-medium hover:text-green-600 focus:outline-none focus:underline"
-              >
-                Pages <ChevronDown className={`w-4 h-4 ml-1 transition-transform ${dropdownOpen.pages ? 'rotate-180' : ''}`} />
-              </button>
-              {dropdownOpen.pages && (
-                <div 
-                  className="absolute top-full left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-100"
-                  role="menu"
-                >
-                  {PAGES_DROPDOWN.map((item) => (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      role="menuitem"
-                      aria-label={item.aria}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-green-600 focus:bg-gray-50 focus:text-green-600"
-                      onClick={() => setDropdownOpen({ pages: false })}
-                    >
-                      {item.name}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
+          
           </nav>
 
           {/* User area */}
