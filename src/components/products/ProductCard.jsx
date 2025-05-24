@@ -1,10 +1,54 @@
 import React from 'react';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Loader2 } from 'lucide-react';
 import { Badge } from '../ui/Input/Badge';
 import { PriceDisplay } from '../ui/Input/PriceDisplay';
 import { RatingStars } from '../ui/Input/RatingStars';
 
-export const ProductCard = ({ product, viewType = 'grid' }) => {
+export const ProductCard = ({ 
+  product, 
+  viewType = 'grid',
+  isLoading = false,
+  onAddToCart = () => {},
+  isAddingToCart = false
+}) => {
+  if (isLoading) {
+    return (
+      <div className={`${
+        viewType === 'grid' 
+          ? 'flex flex-col bg-white rounded-md shadow-sm relative'
+          : 'flex flex-col sm:flex-row bg-white rounded-md shadow-sm relative'
+      } animate-pulse`}>
+        <div className={`${
+          viewType === 'grid' ? 'p-4 flex justify-center' : 'sm:w-1/3 p-4 flex justify-center'
+        }`}>
+          <div className="h-36 w-full bg-gray-200 rounded"></div>
+        </div>
+        
+        <div className={`${
+          viewType === 'grid' ? 'p-4 flex flex-col' : 'sm:w-2/3 p-4 flex flex-col'
+        } space-y-3`}>
+          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+          <div className="h-4 bg-gray-200 rounded"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-8 bg-gray-200 rounded mt-4"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className={`${
+        viewType === 'grid' 
+          ? 'flex flex-col bg-white rounded-md shadow-sm relative'
+          : 'flex flex-col sm:flex-row bg-white rounded-md shadow-sm relative'
+      } items-center justify-center p-8 text-gray-500`}>
+        Product not available
+      </div>
+    );
+  }
+
   return (
     <div className={`${
       viewType === 'grid' 
@@ -30,24 +74,39 @@ export const ProductCard = ({ product, viewType = 'grid' }) => {
       )}
       
       {/* Product image */}
-      <div className={`${viewType === 'grid' ? 'p-4 flex justify-center' : 'sm:w-1/3 p-4 flex justify-center'}`}>
+      <div className={`${
+        viewType === 'grid' ? 'p-4 flex justify-center' : 'sm:w-1/3 p-4 flex justify-center'
+      }`}>
         <img 
           src={product.image} 
           alt={product.name}
           className="h-36 w-auto object-contain"
+          loading="lazy"
+          onError={(e) => {
+            e.target.src = 'https://via.placeholder.com/150?text=No+Image';
+          }}
         />
       </div>
       
       {/* Product details */}
-      <div className={`${viewType === 'grid' ? 'p-4 flex flex-col flex-grow' : 'sm:w-2/3 p-4 flex flex-col flex-grow'}`}>
+      <div className={`${
+        viewType === 'grid' ? 'p-4 flex flex-col flex-grow' : 'sm:w-2/3 p-4 flex flex-col flex-grow'
+      }`}>
         {/* Review count */}
         {product.reviews > 0 && (
           <div className="flex items-center text-xs text-gray-500 mb-2">
-            <RatingStars rating={4} size={12} showCount count={product.reviews} />
+            <RatingStars 
+              rating={4} 
+              size={12} 
+              showCount 
+              count={product.reviews} 
+            />
           </div>
         )}
         
-        <h3 className="text-sm font-medium mb-2 flex-grow">{product.name}</h3>
+        <h3 className="text-sm font-medium mb-2 flex-grow line-clamp-2">
+          {product.name}
+        </h3>
         
         {/* Price display */}
         <div className="mb-2">
@@ -60,7 +119,11 @@ export const ProductCard = ({ product, viewType = 'grid' }) => {
         
         {/* Shipping and gift information */}
         <div className="flex flex-wrap gap-2 mb-1">
-          <div className={`text-xs ${product.shipping === 'FREE SHIPPING' ? 'text-green-500' : 'text-gray-600'}`}>
+          <div className={`text-xs ${
+            product.shipping === 'FREE SHIPPING' 
+              ? 'text-green-500' 
+              : 'text-gray-600'
+          }`}>
             {product.shipping}
           </div>
           
@@ -81,23 +144,49 @@ export const ProductCard = ({ product, viewType = 'grid' }) => {
         )}
         
         {/* Alternative options */}
-        {product.alternatives && (
+        {product.alternatives && product.alternatives.length > 0 && (
           <div className="mt-2 flex gap-2">
-            {product.alternatives.map((alt, idx) => (
+            {product.alternatives.slice(0, 3).map((alt, idx) => (
               <img 
                 key={idx}
                 src={alt}
                 alt="Product variant"
-                className="w-8 h-8 border border-gray-300 rounded-sm"
+                className="w-8 h-8 border border-gray-300 rounded-sm object-cover"
+                loading="lazy"
+                onError={(e) => {
+                  e.target.src = 'https://via.placeholder.com/32?text=Alt';
+                }}
               />
             ))}
+            {product.alternatives.length > 3 && (
+              <div className="w-8 h-8 border border-gray-300 rounded-sm flex items-center justify-center text-xs bg-gray-100">
+                +{product.alternatives.length - 3}
+              </div>
+            )}
           </div>
         )}
         
         {/* Add to cart button */}
-        <button className="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md flex items-center justify-center gap-2">
-          <ShoppingCart size={16} />
-          <span>Add to Cart</span>
+        <button 
+          className={`mt-4 w-full ${
+            product.stock 
+              ? 'bg-blue-500 hover:bg-blue-600' 
+              : 'bg-gray-400 cursor-not-allowed'
+          } text-white py-2 px-4 rounded-md flex items-center justify-center gap-2 transition-colors`}
+          onClick={onAddToCart}
+          disabled={!product.stock || isAddingToCart}
+        >
+          {isAddingToCart ? (
+            <>
+              <Loader2 className="animate-spin" size={16} />
+              <span>Adding...</span>
+            </>
+          ) : (
+            <>
+              <ShoppingCart size={16} />
+              <span>{product.stock ? 'Add to Cart' : 'Out of Stock'}</span>
+            </>
+          )}
         </button>
       </div>
     </div>

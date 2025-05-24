@@ -93,7 +93,7 @@ const Footer = () => {
   );
 
   return (
-    <footer className="bg-white w-full text-black px-4 sm:px-6 py-12 mt-20 border-t text-sm items-start text-left">
+    <footer className="bg-white w-full text-black px-4 sm:px-6 py-12 mt-20  text-sm items-start text-left">
       <div className="w-full px-4 sm:px-6 lg:px-8 mx-auto">
         {/* Mobile view - Accordion style */}
         <div className="md:hidden space-y-2">
