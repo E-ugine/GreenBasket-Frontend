@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import ProductImages from "./ProductImages";
 import ProductInfo from "./ProductInfo";
@@ -40,7 +40,7 @@ const createFallbackProduct = (productId = null) => {
 };
 
 export default function ProductDetails() {
-   const { id } = useParams();
+  const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -48,50 +48,96 @@ export default function ProductDetails() {
   const [selectedMemory, setSelectedMemory] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [showSidePanel, setShowSidePanel] = useState(false);
+  
+  // Use ref to track abort controller
+  const controllerRef = useRef(null);
 
- useEffect(() => {
-  console.log("useEffect running for product Id:", id)
-  if (!id) {
-    setError('Product ID is required');
-    setProduct(createFallbackProduct());
-    setLoading(false);
-    return;
-  }
-
-  const controller = new AbortController();
-  const { signal } = controller;
-
-  const loadProduct = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      console.log('Fetching product ID:', id); 
-      const productData = await fetchProductDetails(id, { signal });
-      console.log('Fetched product data:', productData); 
-      
-      if (!productData || productData.error) {
-        throw new Error(productData?.error || 'Product not found');
-      }
-
-      setProduct(productData);
-      setSelectedColor(productData.colors?.[0] || null);
-      setSelectedMemory(productData.memorySizes?.[0] || null);
-    } catch (err) {
-      if (err.name !== 'AbortError') {
-        console.error('Error loading product:', err); 
-        setError(err.message || 'Failed to load product details');
-        setProduct(createFallbackProduct(id));
-      }
-    } finally {
+  useEffect(() => {
+    console.log("useEffect running for product Id:", id);
+    
+    if (!id) {
+      setError('Product ID is required');
+      setProduct(createFallbackProduct());
       setLoading(false);
+      return;
     }
-  };
 
-  loadProduct();
+    // Abort any previous request
+    if (controllerRef.current && !controllerRef.current.signal.aborted) {
+      controllerRef.current.abort();
+    }
 
-  return () => controller.abort();
-}, [id]);
+    // Create new AbortController for this effect
+    const controller = new AbortController();
+    controllerRef.current = controller;
+    const { signal } = controller;
+
+    const loadProduct = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        console.log('Fetching product ID:', id); 
+        
+        // Add a small delay to handle React Strict Mode double mounting
+        await new Promise(resolve => setTimeout(resolve, 10));
+        
+        // Check if request was aborted during the delay
+        if (signal.aborted) {
+          console.log('Request was aborted before fetch');
+          return;
+        }
+        
+        const productData = await fetchProductDetails(id, { signal });
+        
+        // Check if request was aborted after fetch
+        if (signal.aborted) {
+          console.log('Request was aborted after fetch');
+          return;
+        }
+        
+        console.log('Fetched product data:', productData); 
+        
+        if (!productData || productData.error) {
+          throw new Error(productData?.error || 'Product not found');
+        }
+
+        setProduct(productData);
+        setSelectedColor(productData.colors?.[0] || null);
+        setSelectedMemory(productData.memorySizes?.[0] || null);
+      } catch (err) {
+        // Only handle errors if request wasn't aborted
+        if (err.name !== 'AbortError' && !signal.aborted) {
+          console.error('Error loading product:', err); 
+          setError(err.message || 'Failed to load product details');
+          setProduct(createFallbackProduct(id));
+        } else if (err.name === 'AbortError') {
+          console.log('Request aborted, ignoring error');
+        }
+      } finally {
+        // Only update loading state if request wasn't aborted
+        if (!signal.aborted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadProduct();
+
+    // Cleanup function
+    return () => {
+      controller.abort();
+    };
+  }, [id]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (controllerRef.current && !controllerRef.current.signal.aborted) {
+        controllerRef.current.abort();
+      }
+    };
+  }, []);
 
   const incrementQuantity = () => setQuantity(prev => Math.min(prev + 1, 99));
   const decrementQuantity = () => setQuantity(prev => Math.max(prev - 1, 1));
