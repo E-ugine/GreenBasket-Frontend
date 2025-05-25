@@ -3,13 +3,13 @@ import { Heart } from "lucide-react";
 import { fetchFrequentlyBoughtTogether } from "../../services/apiData";
 import LoadingSpinner from "./LoadingSpinner";
 
-export default function FrequentlyBoughtTogether({ productId }) {
+export default function FrequentlyBoughtTogether({ id }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
 
-  // Memoize the calculation to prevent unnecessary recalculations
+
   const calculateTotal = useCallback(() => {
     return items
       .filter(item => selectedItems.includes(item.id))
@@ -18,8 +18,7 @@ export default function FrequentlyBoughtTogether({ productId }) {
   }, [items, selectedItems]);
 
   useEffect(() => {
-    // Don't fetch if productId is not available
-    if (!productId) {
+    if (!id) {
       setLoading(false);
       return;
     }
@@ -28,9 +27,8 @@ export default function FrequentlyBoughtTogether({ productId }) {
       try {
         setLoading(true);
         setError(null);
-        const data = await fetchFrequentlyBoughtTogether(productId);
+        const data = await fetchFrequentlyBoughtTogether(id);
         setItems(data);
-        // Select all items by default
         setSelectedItems(data.map(item => item.id));
       } catch (err) {
         console.error('Failed to load frequently bought items:', err);
@@ -41,7 +39,7 @@ export default function FrequentlyBoughtTogether({ productId }) {
     };
 
     loadData();
-  }, [productId]);
+  }, [id]);
 
   const toggleItem = (itemId) => {
     setSelectedItems(prev => 
@@ -52,19 +50,16 @@ export default function FrequentlyBoughtTogether({ productId }) {
   };
 
   const handleAddToCart = () => {
-    // Implement your add to cart logic here
     console.log('Adding items to cart:', selectedItems);
     alert(`Added ${selectedItems.length} items to cart (Total: $${calculateTotal()})`);
   };
 
   const handleAddToWishlist = () => {
-    // Implement your wishlist logic here
     console.log('Adding items to wishlist:', selectedItems);
     alert(`Added ${selectedItems.length} items to wishlist`);
   };
 
-  // Don't render anything if no productId
-  if (!productId) return null;
+  if (!id) return null;
   
   if (loading) return <LoadingSpinner />;
   if (error) return <div className="text-red-500 p-4 text-center">{error}</div>;

@@ -40,7 +40,7 @@ const createFallbackProduct = (productId = null) => {
 };
 
 export default function ProductDetails() {
-  const { productId } = useParams();
+   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -49,45 +49,49 @@ export default function ProductDetails() {
   const [quantity, setQuantity] = useState(1);
   const [showSidePanel, setShowSidePanel] = useState(false);
 
-  useEffect(() => {
-    if (!productId) {
-      setError('Product ID is required');
-      setProduct(createFallbackProduct());
-      setLoading(false);
-      return;
-    }
+ useEffect(() => {
+  console.log("useEffect running for product Id:", id)
+  if (!id) {
+    setError('Product ID is required');
+    setProduct(createFallbackProduct());
+    setLoading(false);
+    return;
+  }
 
-    const controller = new AbortController();
-    const { signal } = controller;
+  const controller = new AbortController();
+  const { signal } = controller;
 
-    const loadProduct = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const productData = await fetchProductDetails(productId, { signal });
-        
-        if (!productData) {
-          throw new Error('Product not found');
-        }
-
-        setProduct(productData);
-        setSelectedColor(productData.colors?.[0] || null);
-        setSelectedMemory(productData.memorySizes?.[0] || null);
-      } catch (err) {
-        if (err.name !== 'AbortError') {
-          setError(err.message || 'Failed to load product details');
-          setProduct(createFallbackProduct(productId));
-        }
-      } finally {
-        setLoading(false);
+  const loadProduct = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('Fetching product ID:', id); 
+      const productData = await fetchProductDetails(id, { signal });
+      console.log('Fetched product data:', productData); 
+      
+      if (!productData || productData.error) {
+        throw new Error(productData?.error || 'Product not found');
       }
-    };
 
-    loadProduct();
+      setProduct(productData);
+      setSelectedColor(productData.colors?.[0] || null);
+      setSelectedMemory(productData.memorySizes?.[0] || null);
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.error('Error loading product:', err); 
+        setError(err.message || 'Failed to load product details');
+        setProduct(createFallbackProduct(id));
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return () => controller.abort();
-  }, [productId]);
+  loadProduct();
+
+  return () => controller.abort();
+}, [id]);
 
   const incrementQuantity = () => setQuantity(prev => Math.min(prev + 1, 99));
   const decrementQuantity = () => setQuantity(prev => Math.max(prev - 1, 1));
@@ -155,7 +159,7 @@ export default function ProductDetails() {
             inStock={product.inStock}
           />
           
-          <FrequentlyBoughtTogether productId={productId} />
+          <FrequentlyBoughtTogether productId={id} />
           <ProductTabs 
             product={product} 
             description={product.description}
@@ -164,7 +168,7 @@ export default function ProductDetails() {
           />
           <PromotionalBanners />
           <RelatedProducts 
-            currentProductId={productId} 
+            currentProductId={id} 
             category={product.category} 
           />
         </>

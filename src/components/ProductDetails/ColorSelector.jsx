@@ -3,7 +3,7 @@ import React from "react";
 export default function ColorSelector({
   selectedColor,
   setSelectedColor,
-  productColors,
+  productColors = [], 
 }) {
   return (
     <div className="mb-6">
@@ -12,7 +12,7 @@ export default function ColorSelector({
         <span>{selectedColor}</span>
       </div>
       <div className="flex gap-2 overflow-x-auto pb-2">
-        {productColors.map((color) => (
+        {productColors?.map((color) => ( 
           <button
             key={color.name}
             onClick={() => setSelectedColor(color.name)}

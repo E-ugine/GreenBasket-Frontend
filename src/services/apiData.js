@@ -111,6 +111,7 @@ export const fetchProductDetails = async (productId, options = {}) => {
   }
 
   const result = await fetchApi(`products/${productId}`, options);
+  console.log("API Response:", result);
 
   if (result.error) {
     console.error(`Failed to fetch product ${productId}:`, result.error);

@@ -2,7 +2,7 @@ import React from "react";
 export default function MemorySelector({
   selectedMemory,
   setSelectedMemory,
-  memorySizes,
+  memorySizes= [],
 }) {
   return (
     <div className="mb-6">
