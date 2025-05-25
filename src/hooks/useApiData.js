@@ -22,13 +22,14 @@ export const useApiData = () => {
           id: product.id,
           name: product.title,
           price: product.price,
-          originalPrice: Math.round(product.price * 1.2), // Add 20% as "original" price
+          description: product.description,
+          originalPrice: Math.round(product.price * 1.2),
           image: product.image,
-          stock: 1, // FakeStoreAPI doesn't provide stock info
+          stock: 1,
           shipping: 'FREE SHIPPING',
-          reviews: Math.floor(Math.random() * 100), // Fake reviews count
-          isNew: Math.random() > 0.7, // 30% chance to be "new"
-          gift: Math.random() > 0.8 // 20% chance to be a "gift"
+          reviews: Math.floor(Math.random() * 100),
+          isNew: Math.random() > 0.7,
+          gift: Math.random() > 0.3
         }));
 
         setProducts(transformedProducts);
@@ -46,9 +47,8 @@ export const useApiData = () => {
 
     fetchData();
 
-    // Cleanup function
     return () => {
-      // Cancel any pending requests if component unmounts
+      // Cleanup if needed
     };
   }, []);
 

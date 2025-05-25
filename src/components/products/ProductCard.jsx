@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Loader2 } from 'lucide-react';
 import { Badge } from '../ui/Input/Badge';
 import { PriceDisplay } from '../ui/Input/PriceDisplay';
@@ -9,8 +10,18 @@ export const ProductCard = ({
   viewType = 'grid',
   isLoading = false,
   onAddToCart = () => {},
-  isAddingToCart = false
+  isAddingToCart = false,
+  onClick = null
 }) => {
+  const navigate = useNavigate();
+
+  const handleCardClick = (e) => {
+    // Don't navigate if clicking on the add to cart button or its children
+    if (!e.target.closest('.add-to-cart') && product?.id) {
+      onClick ? onClick() : navigate(`/products/${product.id}`);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className={`${
@@ -50,11 +61,14 @@ export const ProductCard = ({
   }
 
   return (
-    <div className={`${
-      viewType === 'grid' 
-        ? 'flex flex-col bg-white rounded-md shadow-sm relative hover:shadow-md transition-shadow'
-        : 'flex flex-col sm:flex-row bg-white rounded-md shadow-sm relative hover:shadow-md transition-shadow'
-    }`}>
+    <div 
+      className={`${
+        viewType === 'grid' 
+          ? 'flex flex-col bg-white rounded-md shadow-sm relative hover:shadow-md transition-shadow h-full'
+          : 'flex flex-col sm:flex-row bg-white rounded-md shadow-sm relative hover:shadow-md transition-shadow'
+      } cursor-pointer`}
+      onClick={handleCardClick}
+    >
       {/* Sale badge or New badge */}
       {product.save ? (
         <div className="absolute top-2 left-2 bg-green-500 text-white text-xs font-medium py-1 px-2 rounded">
@@ -80,7 +94,7 @@ export const ProductCard = ({
         <img 
           src={product.image} 
           alt={product.name}
-          className="h-36 w-auto object-contain"
+          className={`${viewType === 'grid' ? 'h-36' : 'h-48'} w-auto object-contain`}
           loading="lazy"
           onError={(e) => {
             e.target.src = 'https://via.placeholder.com/150?text=No+Image';
@@ -104,9 +118,18 @@ export const ProductCard = ({
           </div>
         )}
         
-        <h3 className="text-sm font-medium mb-2 flex-grow line-clamp-2">
+        <h3 className="text-sm font-medium mb-1 line-clamp-2">
           {product.name}
         </h3>
+        
+        {/* Product description - different styling for grid vs list */}
+        <p className={`${
+          viewType === 'grid' 
+            ? 'text-xs text-gray-600 mb-2 line-clamp-2' 
+            : 'text-sm text-gray-700 mb-3 line-clamp-3'
+        }`}>
+          {product.description || 'No description available'}
+        </p>
         
         {/* Price display */}
         <div className="mb-2">
@@ -143,37 +166,17 @@ export const ProductCard = ({
           <Badge type="error" text="Out of stock" />
         )}
         
-        {/* Alternative options */}
-        {product.alternatives && product.alternatives.length > 0 && (
-          <div className="mt-2 flex gap-2">
-            {product.alternatives.slice(0, 3).map((alt, idx) => (
-              <img 
-                key={idx}
-                src={alt}
-                alt="Product variant"
-                className="w-8 h-8 border border-gray-300 rounded-sm object-cover"
-                loading="lazy"
-                onError={(e) => {
-                  e.target.src = 'https://via.placeholder.com/32?text=Alt';
-                }}
-              />
-            ))}
-            {product.alternatives.length > 3 && (
-              <div className="w-8 h-8 border border-gray-300 rounded-sm flex items-center justify-center text-xs bg-gray-100">
-                +{product.alternatives.length - 3}
-              </div>
-            )}
-          </div>
-        )}
-        
         {/* Add to cart button */}
         <button 
-          className={`mt-4 w-full ${
+          className={`add-to-cart mt-4 w-full ${
             product.stock 
               ? 'bg-blue-500 hover:bg-blue-600' 
               : 'bg-gray-400 cursor-not-allowed'
           } text-white py-2 px-4 rounded-md flex items-center justify-center gap-2 transition-colors`}
-          onClick={onAddToCart}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddToCart();
+          }}
           disabled={!product.stock || isAddingToCart}
         >
           {isAddingToCart ? (

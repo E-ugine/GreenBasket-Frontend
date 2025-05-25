@@ -1,70 +1,85 @@
-import React from "react";
-import ProductCard from "./ProductCard";
+import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
+import ProductCard from './ProductCard';
+import LoadingSpinner from './LoadingSpinner';
 
-export default function RelatedProducts() {
-  const products = [
-    {
-      id: 1,
-      name: "SROK Smart Phone 128GB, Oled Retina",
-      price: 579.00,
-      originalPrice: 859.00,
-      ratingCount: 152,
-      isNew: false,
-      isOnSale: true,
-      saleText: "SAVE\n$199.00",
-      shipping: "FREE SHIPPING",
-      inStock: true,
-      colors: []
-    },
-    {
-      id: 2,
-      name: "aPod Pro Tablet 2023 LTE + Wifi, GPS Cellular 12.9 Inch, 512GB",
-      price: 979.00,
-      maxPrice: 1259.00,
-      isNew: true,
-      shipping: "$2.98 SHIPPING",
-      inStock: true
-    },
-    {
-      id: 3,
-      name: "OPod Pro 12.9 Inch M1 2023, 64GB + Wifi, GPS",
-      price: 659.00,
-      ratingCount: 5,
-      shipping: "FREE SHIPPING",
-      hasGift: true,
-      inStock: true,
-      colors: ["gray", "blue", "green"]
-    },
-    {
-      id: 4,
-      name: "Xiamoi Redmi Note 5, 64GB",
-      price: 1239.00,
-      originalPrice: 1619.00,
-      ratingCount: 9,
-      isOnSale: true,
-      saleText: "SAVE\n$59.00",
-      shipping: "FREE SHIPPING",
-      inStock: false
-    },
-    {
-      id: 5,
-      name: "Microsute Alpha Ultra S5 Surface 128GB 2022, Silver",
-      price: 1729.00,
-      ratingCount: 8,
-      shipping: "FREE SHIPPING",
-      inStock: false,
-      colors: ["gray", "blue"]
-    }
-  ];
+const RelatedProducts = ({ currentProductId, category }) => {
+  const [products, setProducts] = useState([]);
+  const [status, setStatus] = useState('idle'); 
+
+  useEffect(() => {
+    if (!currentProductId || !category) return;
+
+    const controller = new AbortController();
+    let isMounted = true;
+
+    const loadProducts = async () => {
+      try {
+        setStatus('loading');
+        
+        const response = await fetch(
+          `https://fakestoreapi.com/products/category/${encodeURIComponent(category)}`,
+          { signal: controller.signal }
+        );
+
+        if (!isMounted) return;
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+        const filtered = data
+          .filter(p => p.id !== currentProductId)
+          .slice(0, 4)
+          .map(p => ({
+            id: p.id,
+            name: p.title,
+            price: p.price,
+            image: p.image,
+            rating: p.rating?.rate
+          }));
+
+        setProducts(filtered);
+        setStatus('success');
+      } catch (error) {
+        if (isMounted && error.name !== 'AbortError') {
+          console.error('Failed to load related products:', error);
+          setStatus('error');
+        }
+      }
+    };
+
+    loadProducts();
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, [currentProductId, category]);
+
+  if (status === 'idle') return null;
+  if (status === 'loading') return <LoadingSpinner />;
+  if (status === 'error') return <div className="text-red-500">Failed to load suggestions</div>;
 
   return (
-    <div className="mt-12 mb-20 lg:mb-10 lg:mr-64">
-      <h2 className="text-xl font-bold mb-6">RELATED PRODUCTS</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4">
+    <section className="my-8" data-testid="related-products">
+      <h2 className="text-xl font-bold mb-4">Related Products</h2>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {products.map(product => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard 
+            key={product.id}
+            product={product}
+          />
         ))}
       </div>
-    </div>
+    </section>
   );
-}
+};
+
+RelatedProducts.propTypes = {
+  currentProductId: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number
+  ]).isRequired,
+  category: PropTypes.string.isRequired
+};
+
+export default RelatedProducts;

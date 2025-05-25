@@ -1,69 +1,83 @@
 import React from "react";
+import ProductMetadata from "./ProductMetadata";
+import RatingStars from "./RatingStars";
+import PriceDisplay from "./PriceDisplay";
 import ColorSelector from "./ColorSelector";
 import MemorySelector from "./MemorySelector";
-import PromotionBanner from "./PromotionBanner";
-import ProductMetadata from "./ProductMetadata";
-import SocialShare from "./SocialShare";
 
 export default function ProductInfo({
+  product,
   selectedColor,
-  setSelectedColor,
+  onSelectColor,
   selectedMemory,
-  setSelectedMemory,
-  productColors,
-  memorySizes,
+  onSelectMemory
 }) {
+  const {
+    name,
+    price,
+    originalPrice,
+    rating,
+    ratingCount,
+    description,
+    colors = [],
+    memorySizes = [],
+    sku,
+    category,
+    brand,
+    inStock
+  } = product;
+
   return (
     <div className="lg:w-1/2">
-      <div className="mb-6">
-        <div className="flex items-center text-sm text-gray-500 mb-2">
-          <span>(5)</span>
-        </div>
-        <h1 className="text-xl sm:text-2xl font-bold mb-2">
-          Somseng Galatero X6 Ultra LTE 4G/128GB, Black Smartphone
-        </h1>
-        <div className="text-xl sm:text-2xl font-bold mb-4">$569.00 - $609.00</div>
-
-        <ul className="space-y-2 mb-6">
-          <li className="flex items-start gap-2">
-            <span className="text-gray-500 mt-1">•</span>
-            <span>Intel LGA 1700 Socket: Supports 13th & 12th Gen Intel Core</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-gray-500 mt-1">•</span>
-            <span>DDR5 Compatible: 4*SMD DIMMs with XMP 3.0 Memory</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-gray-500 mt-1">•</span>
-            <span>Commanding Power Design: Twin 16+1+2 Phases Digital VRM</span>
-          </li>
-        </ul>
-
-        <div className="flex gap-2 sm:gap-4 my-4 flex-wrap">
-          <span className="bg-green-100 text-green-600 px-3 py-1 text-sm rounded">
-            FREE SHIPPING
-          </span>
-          <span className="bg-red-100 text-red-600 px-3 py-1 text-sm rounded">
-            FREE GIFT
-          </span>
+      <h1 className="text-2xl sm:text-3xl font-bold mb-2">{name}</h1>
+      
+      <div className="flex items-center gap-2 mb-4">
+        <RatingStars rating={rating} size={16} />
+        <span className="text-sm text-gray-500">
+          {ratingCount} {ratingCount === 1 ? 'review' : 'reviews'}
+        </span>
+      </div>
+      
+      <PriceDisplay 
+        price={price} 
+        originalPrice={originalPrice} 
+        className="text-2xl mb-4"
+      />
+      
+      <ProductMetadata 
+        sku={sku}
+        category={category}
+        brand={brand}
+      />
+      
+      <p className="mb-6">{description}</p>
+      
+      {colors.length > 0 && (
+        <ColorSelector 
+          colors={colors}
+          selectedColor={selectedColor}
+          onSelectColor={onSelectColor}
+          className="mb-6"
+        />
+      )}
+      
+      {memorySizes.length > 0 && (
+        <MemorySelector 
+          sizes={memorySizes}
+          selectedSize={selectedMemory}
+          onSelectSize={onSelectMemory}
+          className="mb-6"
+        />
+      )}
+      
+      <div className="border-t border-b border-gray-200 py-4 mb-6">
+        <div className="flex items-center gap-2">
+          <span className={`w-3 h-3 rounded-full ${
+            inStock ? 'bg-green-500' : 'bg-red-500'
+          }`}></span>
+          <span>{inStock ? 'In Stock' : 'Out of Stock'}</span>
         </div>
       </div>
-
-      <ColorSelector
-        selectedColor={selectedColor}
-        setSelectedColor={setSelectedColor}
-        productColors={productColors}
-      />
-
-      <MemorySelector
-        selectedMemory={selectedMemory}
-        setSelectedMemory={setSelectedMemory}
-        memorySizes={memorySizes}
-      />
-
-      <PromotionBanner />
-      <ProductMetadata />
-      <SocialShare />
     </div>
   );
 }
