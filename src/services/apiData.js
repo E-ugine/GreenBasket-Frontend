@@ -4,7 +4,12 @@ const DEFAULT_TIMEOUT = 8000;
 const fetchApi = async (endpoint, options = {}, retries = 3) => {
   for (let attempt = 1; attempt <= retries; attempt++) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), options.timeout || DEFAULT_TIMEOUT);
+    let timeoutId;
+    
+    // Don't create timeout if external signal is already provided
+    if (!options.signal) {
+      timeoutId = setTimeout(() => controller.abort(), options.timeout || DEFAULT_TIMEOUT);
+    }
 
     try {
       const response = await fetch(`${API_URL}/${endpoint}`, {
@@ -12,7 +17,7 @@ const fetchApi = async (endpoint, options = {}, retries = 3) => {
         signal: options.signal || controller.signal
       });
 
-      clearTimeout(timeoutId);
+      if (timeoutId) clearTimeout(timeoutId);
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -28,10 +33,29 @@ const fetchApi = async (endpoint, options = {}, retries = 3) => {
 
       return JSON.parse(text);
     } catch (error) {
-      clearTimeout(timeoutId);
+      if (timeoutId) clearTimeout(timeoutId);
+      
+      // If it's an AbortError and we have an external signal, don't retry
+      if (error.name === 'AbortError' && options.signal) {
+        // Don't log in development - this is normal React Strict Mode behavior
+        if (process.env.NODE_ENV !== 'development') {
+          console.log(`Request aborted for ${endpoint}`);
+        }
+        throw error; // Re-throw AbortError to be handled by caller
+      }
+      
+      // If it's an AbortError from our internal timeout, continue with retry logic
+      if (error.name === 'AbortError') {
+        console.log(`Request timed out for ${endpoint}, attempt ${attempt}`);
+      }
       
       if (attempt === retries) {
         console.error(`API call failed after ${retries} attempts: ${endpoint}`, error);
+        return { error: error.message };
+      }
+
+      // Don't retry if request was externally aborted
+      if (error.name === 'AbortError' && options.signal?.aborted) {
         return { error: error.message };
       }
 
@@ -110,47 +134,73 @@ export const fetchProductDetails = async (productId, options = {}) => {
     return createFallbackProduct();
   }
 
-  const result = await fetchApi(`products/${productId}`, options);
-  console.log("API Response:", result);
+  try {
+    const result = await fetchApi(`products/${productId}`, options);
+    console.log("API Response:", result);
 
-  if (result.error) {
-    console.error(`Failed to fetch product ${productId}:`, result.error);
+    if (result.error) {
+      console.error(`Failed to fetch product ${productId}:`, result.error);
+      return createFallbackProduct(productId);
+    }
+
+    const transformed = transformProduct(result);
+    return transformed || createFallbackProduct(productId);
+  } catch (error) {
+    // Re-throw AbortErrors to be handled by the component
+    if (error.name === 'AbortError') {
+      throw error;
+    }
+    
+    console.error(`Error in fetchProductDetails for ${productId}:`, error);
     return createFallbackProduct(productId);
   }
-
-  const transformed = transformProduct(result);
-  return transformed || createFallbackProduct(productId);
 };
 
 export const fetchProducts = async (options = {}) => {
-  const result = await fetchApi('products', options);
-  
-  if (result.error) {
-    console.error('Failed to fetch products:', result.error);
+  try {
+    const result = await fetchApi('products', options);
+    
+    if (result.error) {
+      console.error('Failed to fetch products:', result.error);
+      return [];
+    }
+
+    return Array.isArray(result) 
+      ? result.map(p => transformProduct(p)).filter(Boolean)
+      : [];
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw error;
+    }
+    console.error('Error in fetchProducts:', error);
     return [];
   }
-
-  return Array.isArray(result) 
-    ? result.map(p => transformProduct(p)).filter(Boolean)
-    : [];
 };
 
 export const fetchCategories = async (options = {}) => {
-  const result = await fetchApi('products/categories', options);
-  
-  if (result.error) {
-    console.error('Failed to fetch categories:', result.error);
-    return [
-      { id: 1, name: 'electronics' },
-      { id: 2, name: 'jewelery' },
-      { id: 3, name: "men's clothing" },
-      { id: 4, name: "women's clothing" }
-    ];
-  }
+  try {
+    const result = await fetchApi('products/categories', options);
+    
+    if (result.error) {
+      console.error('Failed to fetch categories:', result.error);
+      return [
+        { id: 1, name: 'electronics' },
+        { id: 2, name: 'jewelery' },
+        { id: 3, name: "men's clothing" },
+        { id: 4, name: "women's clothing" }
+      ];
+    }
 
-  return Array.isArray(result)
-    ? result.map((name, index) => ({ id: index + 1, name }))
-    : [];
+    return Array.isArray(result)
+      ? result.map((name, index) => ({ id: index + 1, name }))
+      : [];
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw error;
+    }
+    console.error('Error in fetchCategories:', error);
+    return [];
+  }
 };
 
 export const fetchFrequentlyBoughtTogether = async (productId, options = {}) => {
@@ -173,6 +223,10 @@ export const fetchFrequentlyBoughtTogether = async (productId, options = {}) => 
       image: item.images?.[0]?.url || '/placeholder-product.jpg'
     }));
   } catch (error) {
+    if (error.name === 'AbortError') {
+      throw error;
+    }
+    
     console.error('Error fetching frequently bought together items:', error);
     
     // Fallback: return some default products if the API fails
@@ -220,6 +274,10 @@ export const fetchRelatedProducts = async (productId, options = {}) => {
       rating: item.rating
     }));
   } catch (error) {
+    if (error.name === 'AbortError') {
+      throw error;
+    }
+    
     console.error('Error fetching related products:', error);
     
     // Fallback: return some default products if the API fails
