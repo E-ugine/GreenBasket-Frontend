@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 
-export default function ProductImages({ images, name, isNew }) {
-  const [mainImage, setMainImage] = useState(images?.[0] || '');
+export default function ProductImages({ image, name, isNew }) {
+  const [mainImage, setMainImage] = useState(image?.[0] || '');
 
-  if (!images || images.length === 0) {
+  if (!image || image.length === 0) {
     return (
       <div className="lg:w-1/2 bg-gray-100 flex items-center justify-center">
         <span className="text-gray-400">No images available</span>
@@ -26,7 +26,7 @@ export default function ProductImages({ images, name, isNew }) {
         />
       </div>
       <div className="flex gap-2 sm:gap-4 mt-4 overflow-x-auto pb-2">
-        {images.map((img, i) => (
+        {image.map((img, i) => (
           <img 
             key={i}
             src={img} 
