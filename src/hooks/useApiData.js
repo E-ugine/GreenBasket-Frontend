@@ -37,7 +37,6 @@ export const useApiData = () => {
       } catch (err) {
         console.error('Fetch error:', err);
         setError(err.message);
-        // Set fallback empty data
         setProducts([]);
         setCategories([{ id: 1, name: 'All Categories' }]);
       } finally {
@@ -48,7 +47,6 @@ export const useApiData = () => {
     fetchData();
 
     return () => {
-      // Cleanup if needed
     };
   }, []);
 

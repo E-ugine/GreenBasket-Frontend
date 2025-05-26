@@ -49,7 +49,6 @@ export default function ProductDetails() {
   const [quantity, setQuantity] = useState(1);
   const [showSidePanel, setShowSidePanel] = useState(false);
   
-  // Use ref to track abort controller
   const controllerRef = useRef(null);
 
   useEffect(() => {
@@ -62,12 +61,10 @@ export default function ProductDetails() {
       return;
     }
 
-    // Abort any previous request
     if (controllerRef.current && !controllerRef.current.signal.aborted) {
       controllerRef.current.abort();
     }
 
-    // Create new AbortController for this effect
     const controller = new AbortController();
     controllerRef.current = controller;
     const { signal } = controller;
@@ -78,19 +75,15 @@ export default function ProductDetails() {
         setError(null);
         
         console.log('Fetching product ID:', id); 
-        
-        // Add a small delay to handle React Strict Mode double mounting
+  
         await new Promise(resolve => setTimeout(resolve, 10));
         
-        // Check if request was aborted during the delay
         if (signal.aborted) {
           console.log('Request was aborted before fetch');
           return;
         }
         
         const productData = await fetchProductDetails(id, { signal });
-        
-        // Check if request was aborted after fetch
         if (signal.aborted) {
           console.log('Request was aborted after fetch');
           return;
@@ -106,7 +99,6 @@ export default function ProductDetails() {
         setSelectedColor(productData.colors?.[0] || null);
         setSelectedMemory(productData.memorySizes?.[0] || null);
       } catch (err) {
-        // Only handle errors if request wasn't aborted
         if (err.name !== 'AbortError' && !signal.aborted) {
           console.error('Error loading product:', err); 
           setError(err.message || 'Failed to load product details');
@@ -115,7 +107,6 @@ export default function ProductDetails() {
           console.log('Request aborted, ignoring error');
         }
       } finally {
-        // Only update loading state if request wasn't aborted
         if (!signal.aborted) {
           setLoading(false);
         }
@@ -124,13 +115,11 @@ export default function ProductDetails() {
 
     loadProduct();
 
-    // Cleanup function
     return () => {
       controller.abort();
     };
   }, [id]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (controllerRef.current && !controllerRef.current.signal.aborted) {
@@ -161,7 +150,7 @@ export default function ProductDetails() {
       
       <div className="flex flex-col lg:flex-row gap-8 relative">
         <ProductImages 
-          images={product?.images || []} 
+          image={product?.image || []} 
           name={product?.name} 
           isNew={product?.isNew} 
         />

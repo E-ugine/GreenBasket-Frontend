@@ -6,7 +6,6 @@ const fetchApi = async (endpoint, options = {}, retries = 3) => {
     const controller = new AbortController();
     let timeoutId;
     
-    // Don't create timeout if external signal is already provided
     if (!options.signal) {
       timeoutId = setTimeout(() => controller.abort(), options.timeout || DEFAULT_TIMEOUT);
     }
@@ -34,17 +33,14 @@ const fetchApi = async (endpoint, options = {}, retries = 3) => {
       return JSON.parse(text);
     } catch (error) {
       if (timeoutId) clearTimeout(timeoutId);
-      
-      // If it's an AbortError and we have an external signal, don't retry
+    
       if (error.name === 'AbortError' && options.signal) {
-        // Don't log in development - this is normal React Strict Mode behavior
         if (process.env.NODE_ENV !== 'development') {
           console.log(`Request aborted for ${endpoint}`);
         }
-        throw error; // Re-throw AbortError to be handled by caller
+        throw error; 
       }
-      
-      // If it's an AbortError from our internal timeout, continue with retry logic
+
       if (error.name === 'AbortError') {
         console.log(`Request timed out for ${endpoint}, attempt ${attempt}`);
       }
@@ -54,7 +50,6 @@ const fetchApi = async (endpoint, options = {}, retries = 3) => {
         return { error: error.message };
       }
 
-      // Don't retry if request was externally aborted
       if (error.name === 'AbortError' && options.signal?.aborted) {
         return { error: error.message };
       }
@@ -73,16 +68,13 @@ const transformProduct = (apiProduct) => {
     id: apiProduct.id,
     name: apiProduct.title,
     price: apiProduct.price,
-    originalPrice: Math.round(apiProduct.price * 1.2), // Add originalPrice
+    originalPrice: Math.round(apiProduct.price * 1.2), 
     discount: Math.round(((apiProduct.price * 1.2) - apiProduct.price) / (apiProduct.price * 1.2) * 100),
     description: apiProduct.description,
     category: apiProduct.category,
-    images: [{ // Transform to expected format
-      url: apiProduct.image,
-      alt: apiProduct.title || 'Product image'
-    }],
+    image: apiProduct.image || '/placeholder-product.jpg',
     rating: apiProduct.rating?.rate || 0,
-    stockCount: Math.floor(Math.random() * 50) + 10, // Random stock count
+    stockCount: Math.floor(Math.random() * 50) + 10,
     isNew: Math.random() > 0.7,
     inStock: true,
     colors: generateRandomColors(),
@@ -92,7 +84,7 @@ const transformProduct = (apiProduct) => {
       'Model': `Model-${apiProduct.id}`,
       'Category': apiProduct.category
     },
-    reviews: [] // Initialize empty reviews array
+    reviews: [] 
   };
 };
 
@@ -146,7 +138,6 @@ export const fetchProductDetails = async (productId, options = {}) => {
     const transformed = transformProduct(result);
     return transformed || createFallbackProduct(productId);
   } catch (error) {
-    // Re-throw AbortErrors to be handled by the component
     if (error.name === 'AbortError') {
       throw error;
     }
@@ -255,10 +246,8 @@ export const fetchFrequentlyBoughtTogether = async (productId, options = {}) => 
 
 export const fetchRelatedProducts = async (productId, options = {}) => {
   try {
-    // First get the current product's category
     const product = await fetchProductDetails(productId, options);
     
-    // Then get all products in the same category
     const allProducts = await fetchProducts(options);
     const sameCategoryProducts = allProducts.filter(
       p => p.category === product.category && p.id !== parseInt(productId)
@@ -270,7 +259,7 @@ export const fetchRelatedProducts = async (productId, options = {}) => {
       id: item.id,
       name: item.name,
       price: item.price,
-      image: item.images?.[0]?.url || '/placeholder-product.jpg',
+      image: item.image?.[0]?.url || '/placeholder-product.jpg',
       rating: item.rating
     }));
   } catch (error) {
