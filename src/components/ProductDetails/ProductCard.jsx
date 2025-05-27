@@ -32,7 +32,10 @@ const ColorSwatch = React.memo(({ color, isSelected, onClick }) => (
     } transition-all duration-300 shadow-sm hover:scale-110`}
     aria-label={`Select color ${color}`}
     title={color}
-    onClick={() => onClick(color)}
+    onClick={(e) => {
+      e.stopPropagation(); // Prevent triggering product navigation
+      onClick(color);
+    }}
   />
 ));
 
@@ -60,8 +63,9 @@ Badge.propTypes = {
   className: PropTypes.string,
 };
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, onNavigate }) => {
   const {
+    id,
     isOnSale,
     saleText,
     isNew,
@@ -90,14 +94,52 @@ const ProductCard = ({ product }) => {
 
   const [selectedColor, setSelectedColor] = React.useState(colors[0] || "");
 
+  // Handle product navigation
+  const handleProductClick = () => {
+    if (onNavigate) {
+      onNavigate(id);
+    } else {
+      // Default behavior - navigate to product detail page
+      // You can customize this based on your routing setup
+      window.location.href = `/products/${id}`;
+      
+      // Alternative for React Router:
+      // const navigate = useNavigate();
+      // navigate(`/products/${id}`);
+      
+      // Alternative for Next.js:
+      // const router = useRouter();
+      // router.push(`/products/${id}`);
+    }
+  };
+
+  // Handle button clicks that shouldn't trigger navigation
+  const handleButtonClick = (e, callback) => {
+    e.stopPropagation();
+    if (callback) callback();
+  };
+
   return (
     <article
-      className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-transform duration-300 ease-in-out hover:scale-[1.015] hover:shadow-lg hover:border-blue-300"
+      className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-transform duration-300 ease-in-out hover:scale-[1.015] hover:shadow-lg hover:border-blue-300 cursor-pointer"
       aria-label={name}
+      onClick={handleProductClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleProductClick();
+        }
+      }}
+      tabIndex={0}
+      role="button"
     >
       <button
         className="absolute right-4 top-4 z-20 rounded-full bg-white p-2 text-gray-400 shadow-md transition duration-200 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
         aria-label="Add to wishlist"
+        onClick={(e) => handleButtonClick(e, () => {
+          // Add wishlist functionality here
+          console.log('Added to wishlist:', id);
+        })}
       >
         <Heart size={20} fill="currentColor" />
       </button>
@@ -148,13 +190,7 @@ const ProductCard = ({ product }) => {
         )}
 
         <h3 className="mb-2 line-clamp-2 text-base font-semibold text-gray-900 transition-colors duration-200 group-hover:text-blue-600">
-          <a
-            href="#"
-            className="focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          >
-            <span className="absolute inset-0" aria-hidden="true" />
-            {name}
-          </a>
+          {name}
         </h3>
 
         <div className="mb-3 flex flex-wrap items-baseline gap-2">
@@ -219,7 +255,13 @@ const ProductCard = ({ product }) => {
           </div>
         )}
 
-        <button className="mt-5 flex w-full items-center justify-center rounded-md bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-2 text-sm font-medium text-white shadow-md transition-all duration-300 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+        <button 
+          className="mt-5 flex w-full items-center justify-center rounded-md bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-2 text-sm font-medium text-white shadow-md transition-all duration-300 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          onClick={(e) => handleButtonClick(e, () => {
+            // Add to cart functionality here
+            console.log('Added to cart:', id);
+          })}
+        >
           <ShoppingCart size={18} className="mr-2" />
           Add to Cart
         </button>
@@ -230,6 +272,7 @@ const ProductCard = ({ product }) => {
 
 ProductCard.propTypes = {
   product: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     isOnSale: PropTypes.bool,
     saleText: PropTypes.string,
     isNew: PropTypes.bool,
@@ -245,6 +288,7 @@ ProductCard.propTypes = {
     colors: PropTypes.arrayOf(PropTypes.string),
     imageUrl: PropTypes.string,
   }).isRequired,
+  onNavigate: PropTypes.func, // Optional custom navigation handler
 };
 
 export default React.memo(ProductCard);

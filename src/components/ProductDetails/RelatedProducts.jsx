@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import ProductCard from './ProductCard';
 import LoadingSpinner from './LoadingSpinner';
 
-const RelatedProducts = ({ currentProductId, category }) => {
+const RelatedProducts = ({ currentProductId, category, onProductClick }) => {
   const [products, setProducts] = useState([]);
   const [status, setStatus] = useState('idle'); 
 
@@ -33,12 +33,16 @@ const RelatedProducts = ({ currentProductId, category }) => {
             id: p.id,
             name: p.title,
             price: p.price,
-            // Fix: Use imageUrl property name that ProductCard expects
             imageUrl: p.image,
-            rating: p.rating?.rate,
-            // Add other properties that ProductCard might expect
+            rating: p.rating?.rate || 0,
+            reviewCount: p.rating?.count || 0,
             inStock: true,
-            ratingCount: p.rating?.count || 0
+            // Add any additional properties your ProductCard expects
+            isOnSale: false,
+            isNew: false,
+            hasGift: false,
+            shipping: null,
+            colors: [],
           }));
 
         setProducts(filtered);
@@ -59,6 +63,17 @@ const RelatedProducts = ({ currentProductId, category }) => {
     };
   }, [currentProductId, category]);
 
+  // Handle product navigation - can be customized per parent component
+  const handleProductNavigation = (productId) => {
+    if (onProductClick) {
+      // Use custom handler if provided
+      onProductClick(productId);
+    } else {
+      // Default navigation behavior
+      window.location.href = `/products/${productId}`;
+    }
+  };
+
   if (status === 'idle') return null;
   if (status === 'loading') return <LoadingSpinner />;
   if (status === 'error') return <div className="text-red-500">Failed to load suggestions</div>;
@@ -71,6 +86,7 @@ const RelatedProducts = ({ currentProductId, category }) => {
           <ProductCard 
             key={product.id}
             product={product}
+            onNavigate={handleProductNavigation}
           />
         ))}
       </div>
@@ -83,7 +99,8 @@ RelatedProducts.propTypes = {
     PropTypes.string,
     PropTypes.number
   ]).isRequired,
-  category: PropTypes.string.isRequired
+  category: PropTypes.string.isRequired,
+  onProductClick: PropTypes.func, // Optional custom navigation handler
 };
 
 export default RelatedProducts;
