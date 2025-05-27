@@ -2,18 +2,15 @@ import React from "react";
 import PropTypes from "prop-types";
 
 export default function ProductMetadata({ product }) {
-  // Generate SKU from product ID if not provided
   const generateSKU = (id, category) => {
     if (!id) return 'GEN000000';
     const categoryCode = category ? category.substring(0, 3).toUpperCase() : 'GEN';
     return `${categoryCode}${String(id).padStart(6, '0')}`;
   };
 
-  // Format category name for display
   const formatCategory = (category) => {
     if (!category) return 'General';
-    
-    // Convert to title case and handle specific categories
+
     const categoryMap = {
       "men's clothing": "Men's Clothing",
       "women's clothing": "Women's Clothing",
@@ -27,13 +24,11 @@ export default function ProductMetadata({ product }) {
                   .join(' ');
   };
 
-  // Extract brand from specifications or generate from category
   const getBrand = (specifications, category) => {
     if (specifications?.Brand && specifications.Brand !== 'Generic') {
       return specifications.Brand;
     }
     
-    // Generate brand based on category
     const brandMap = {
       "electronics": "TechPro",
       "men's clothing": "StyleCo",
@@ -81,7 +76,6 @@ export default function ProductMetadata({ product }) {
         <span className="font-bold">BRAND:</span>
         <span className="text-green-500">{brand}</span>
       </div>
-      {/* Optional: Add more metadata if available */}
       {product.specifications?.Model && (
         <div className="flex gap-2 flex-wrap">
           <span className="font-bold">MODEL:</span>
