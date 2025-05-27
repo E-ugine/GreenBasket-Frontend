@@ -11,38 +11,19 @@ import PromotionalBanners from "./PromotionalBanners";
 import RelatedProducts from "./RelatedProducts";
 import { fetchProductDetails } from "../../services/apiData";
 import LoadingSpinner from "./LoadingSpinner";
-import NoteFoundPage from "./NotFoundPage";
+import NotFoundPage from "./NotFoundPage";
 
-const createFallbackProduct = (productId = null) => {
-  return {
-    id: productId || 'fallback-product',
-    name: 'Product Not Available',
-    price: 0,
-    originalPrice: 0,
-    discount: 0,
-    images: [
-      {
-        url: '/placeholder-product-image.jpg',
-        alt: 'Product image not available'
-      }
-    ],
-    colors: [],
-    memorySizes: [],
-    inStock: false,
-    isNew: false,
-    category: '',
-    description: 'This product is currently unavailable.',
-    specifications: {},
-    reviews: [],
-    rating: 0,
-    stockCount: 0
-  };
-};
+const ErrorMessage = ({ message }) => (
+  <div className="text-center text-red-500 p-4">
+    {message}
+  </div>
+);
 
 export default function ProductDetails() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
   const [error, setError] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedMemory, setSelectedMemory] = useState(null);
@@ -55,8 +36,7 @@ export default function ProductDetails() {
     console.log("useEffect running for product Id:", id);
     
     if (!id) {
-      setError('Product ID is required');
-      setProduct(createFallbackProduct());
+      setNotFound(true);
       setLoading(false);
       return;
     }
@@ -73,6 +53,7 @@ export default function ProductDetails() {
       try {
         setLoading(true);
         setError(null);
+        setNotFound(false);
         
         console.log('Fetching product ID:', id); 
   
@@ -91,8 +72,13 @@ export default function ProductDetails() {
         
         console.log('Fetched product data:', productData); 
         
-        if (!productData || productData.error) {
-          throw new Error(productData?.error || 'Product not found');
+        // Consistent handling for non-existent products
+        if (!productData || 
+            productData.error || 
+            productData.id === null || 
+            productData.id === undefined) {
+          setNotFound(true);
+          return;
         }
 
         setProduct(productData);
@@ -100,9 +86,16 @@ export default function ProductDetails() {
         setSelectedMemory(productData.memorySizes?.[0] || null);
       } catch (err) {
         if (err.name !== 'AbortError' && !signal.aborted) {
-          console.error('Error loading product:', err); 
-          setError(err.message || 'Failed to load product details');
-          setProduct(createFallbackProduct(id));
+          console.error('Error loading product:', err);
+          
+          // Treat 404-type errors as not found, others as system errors
+          if (err.message?.includes('not found') || 
+              err.message?.includes('404') ||
+              err.status === 404) {
+            setNotFound(true);
+          } else {
+            setError(err.message || 'Failed to load product details');
+          }
         } else if (err.name === 'AbortError') {
           console.log('Request aborted, ignoring error');
         }
@@ -131,13 +124,37 @@ export default function ProductDetails() {
   const incrementQuantity = () => setQuantity(prev => Math.min(prev + 1, 99));
   const decrementQuantity = () => setQuantity(prev => Math.max(prev - 1, 1));
 
+  // Loading state
   if (loading) return <LoadingSpinner fullPage />;
   
-  if (error && !product) {
+  // Product not found - let NotFoundPage handle this consistently
+  if (notFound) {
+    return <NotFoundPage type="product" productId={id} />;
+  }
+  
+  // System error (network issues, server errors, etc.)
+  if (error) {
     return (
-      <NoteFoundPage 
-      />
+      <div className="max-w-6xl mx-auto p-4 bg-white">
+        <div className="text-center py-12">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            Something went wrong
+          </h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
     );
+  }
+
+  // Product loaded successfully
+  if (!product) {
+    return <NotFoundPage type="product" productId={id} />;
   }
 
   return (
@@ -145,69 +162,57 @@ export default function ProductDetails() {
       <MobileStickyBar 
         showSidePanel={showSidePanel} 
         setShowSidePanel={setShowSidePanel} 
-        price={product?.price || 0}
+        price={product.price}
       />
       
       <div className="flex flex-col lg:flex-row gap-8 relative">
         <ProductImages 
-          image={product?.image || []} 
-          name={product?.name} 
-          isNew={product?.isNew} 
+          image={product.image} 
+          name={product.name} 
+          isNew={product.isNew} 
         />
         
-        {product ? (
-          <>
-            <ProductInfo 
-              product={product}
-              selectedColor={selectedColor}
-              onSelectColor={setSelectedColor}
-              selectedMemory={selectedMemory}
-              onSelectMemory={setSelectedMemory}
-            />
+        <ProductInfo 
+          product={product}
+          selectedColor={selectedColor}
+          onSelectColor={setSelectedColor}
+          selectedMemory={selectedMemory}
+          onSelectMemory={setSelectedMemory}
+        />
 
-            <DesktopSidePanel 
-              quantity={quantity}
-              incrementQuantity={incrementQuantity}
-              decrementQuantity={decrementQuantity}
-              price={product.price}
-              originalPrice={product.originalPrice}
-              inStock={product.inStock}
-            />
-          </>
-        ) : (
-          <div className="lg:w-1/2">
-            <ErrorMessage message="Product information is unavailable" />
-          </div>
-        )}
+        <DesktopSidePanel 
+          quantity={quantity}
+          incrementQuantity={incrementQuantity}
+          decrementQuantity={decrementQuantity}
+          price={product.price}
+          originalPrice={product.originalPrice}
+          inStock={product.inStock}
+        />
       </div>
 
-      {product && (
-        <>
-          <MobileSidePanel 
-            showSidePanel={showSidePanel}
-            setShowSidePanel={setShowSidePanel}
-            quantity={quantity}
-            incrementQuantity={incrementQuantity}
-            decrementQuantity={decrementQuantity}
-            price={product.price}
-            originalPrice={product.originalPrice}
-            inStock={product.inStock}
-          />
-          
-          <FrequentlyBoughtTogether productId={id} />
-          <ProductTabs 
-            product={product} 
-            description={product.description}
-            specifications={product.specifications}
-            reviews={product.reviews}
-          />
-          <PromotionalBanners />
-          <RelatedProducts 
-            currentProductId={id} 
-            category={product.category} 
-          />
-        </>
-      )}
+      <MobileSidePanel 
+        showSidePanel={showSidePanel}
+        setShowSidePanel={setShowSidePanel}
+        quantity={quantity}
+        incrementQuantity={incrementQuantity}
+        decrementQuantity={decrementQuantity}
+        price={product.price}
+        originalPrice={product.originalPrice}
+        inStock={product.inStock}
+      />
+      
+      <FrequentlyBoughtTogether productId={id} />
+      <ProductTabs 
+        product={product} 
+        description={product.description}
+        specifications={product.specifications}
+        reviews={product.reviews}
+      />
+      <PromotionalBanners />
+      <RelatedProducts 
+        currentProductId={parseInt(id)} 
+        category={product.category} 
+      />
     </div>
   );
 }

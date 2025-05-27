@@ -72,7 +72,7 @@ const transformProduct = (apiProduct) => {
     discount: Math.round(((apiProduct.price * 1.2) - apiProduct.price) / (apiProduct.price * 1.2) * 100),
     description: apiProduct.description,
     category: apiProduct.category,
-    image: apiProduct.image || '/placeholder-product.jpg',
+  image: apiProduct.image ? [apiProduct.image] : ['/placeholder-product.jpg'],
     rating: apiProduct.rating?.rate || 0,
     stockCount: Math.floor(Math.random() * 50) + 10,
     isNew: Math.random() > 0.7,
@@ -268,8 +268,6 @@ export const fetchRelatedProducts = async (productId, options = {}) => {
     }
     
     console.error('Error fetching related products:', error);
-    
-    // Fallback: return some default products if the API fails
     return [
       {
         id: 1,
