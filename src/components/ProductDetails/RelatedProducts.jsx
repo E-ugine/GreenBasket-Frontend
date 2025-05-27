@@ -33,8 +33,12 @@ const RelatedProducts = ({ currentProductId, category }) => {
             id: p.id,
             name: p.title,
             price: p.price,
-            image: p.image,
-            rating: p.rating?.rate
+            // Fix: Use imageUrl property name that ProductCard expects
+            imageUrl: p.image,
+            rating: p.rating?.rate,
+            // Add other properties that ProductCard might expect
+            inStock: true,
+            ratingCount: p.rating?.count || 0
           }));
 
         setProducts(filtered);
