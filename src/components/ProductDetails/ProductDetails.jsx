@@ -11,7 +11,7 @@ import PromotionalBanners from "./PromotionalBanners";
 import RelatedProducts from "./RelatedProducts";
 import { fetchProductDetails } from "../../services/apiData";
 import LoadingSpinner from "./LoadingSpinner";
-import NoteFoundPage from "./NotFoundPage";
+import NotFoundPage from "./NotFoundPage";
 
 const createFallbackProduct = (productId = null) => {
   return {
@@ -20,24 +20,30 @@ const createFallbackProduct = (productId = null) => {
     price: 0,
     originalPrice: 0,
     discount: 0,
-    images: [
-      {
-        url: '/placeholder-product-image.jpg',
-        alt: 'Product image not available'
-      }
-    ],
+    image: ['/placeholder-product-image.jpg'],
     colors: [],
     memorySizes: [],
     inStock: false,
     isNew: false,
-    category: '',
+    category: 'unavailable',
     description: 'This product is currently unavailable.',
-    specifications: {},
+    specifications: {
+      Brand: 'Generic',
+      Model: 'N/A'
+    },
     reviews: [],
     rating: 0,
+    ratingCount: 0,
     stockCount: 0
   };
 };
+
+// Error message component
+const ErrorMessage = ({ message }) => (
+  <div className="text-center text-red-500 p-4">
+    {message}
+  </div>
+);
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -134,10 +140,7 @@ export default function ProductDetails() {
   if (loading) return <LoadingSpinner fullPage />;
   
   if (error && !product) {
-    return (
-      <NoteFoundPage 
-      />
-    );
+    return <NotFoundPage />;
   }
 
   return (
@@ -203,7 +206,7 @@ export default function ProductDetails() {
           />
           <PromotionalBanners />
           <RelatedProducts 
-            currentProductId={id} 
+            currentProductId={parseInt(id)} 
             category={product.category} 
           />
         </>
