@@ -33,7 +33,7 @@ const ColorSwatch = React.memo(({ color, isSelected, onClick }) => (
     aria-label={`Select color ${color}`}
     title={color}
     onClick={(e) => {
-      e.stopPropagation(); // Prevent triggering product navigation
+      e.stopPropagation();
       onClick(color);
     }}
   />
@@ -93,27 +93,15 @@ const ProductCard = ({ product, onNavigate }) => {
   );
 
   const [selectedColor, setSelectedColor] = React.useState(colors[0] || "");
-
-  // Handle product navigation
   const handleProductClick = () => {
     if (onNavigate) {
       onNavigate(id);
     } else {
-      // Default behavior - navigate to product detail page
-      // You can customize this based on your routing setup
       window.location.href = `/products/${id}`;
-      
-      // Alternative for React Router:
-      // const navigate = useNavigate();
-      // navigate(`/products/${id}`);
-      
-      // Alternative for Next.js:
-      // const router = useRouter();
-      // router.push(`/products/${id}`);
+
     }
   };
 
-  // Handle button clicks that shouldn't trigger navigation
   const handleButtonClick = (e, callback) => {
     e.stopPropagation();
     if (callback) callback();
@@ -137,7 +125,6 @@ const ProductCard = ({ product, onNavigate }) => {
         className="absolute right-4 top-4 z-20 rounded-full bg-white p-2 text-gray-400 shadow-md transition duration-200 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
         aria-label="Add to wishlist"
         onClick={(e) => handleButtonClick(e, () => {
-          // Add wishlist functionality here
           console.log('Added to wishlist:', id);
         })}
       >
@@ -258,7 +245,6 @@ const ProductCard = ({ product, onNavigate }) => {
         <button 
           className="mt-5 flex w-full items-center justify-center rounded-md bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-2 text-sm font-medium text-white shadow-md transition-all duration-300 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           onClick={(e) => handleButtonClick(e, () => {
-            // Add to cart functionality here
             console.log('Added to cart:', id);
           })}
         >
@@ -288,7 +274,7 @@ ProductCard.propTypes = {
     colors: PropTypes.arrayOf(PropTypes.string),
     imageUrl: PropTypes.string,
   }).isRequired,
-  onNavigate: PropTypes.func, // Optional custom navigation handler
+  onNavigate: PropTypes.func, 
 };
 
 export default React.memo(ProductCard);

@@ -37,7 +37,6 @@ const RelatedProducts = ({ currentProductId, category, onProductClick }) => {
             rating: p.rating?.rate || 0,
             reviewCount: p.rating?.count || 0,
             inStock: true,
-            // Add any additional properties your ProductCard expects
             isOnSale: false,
             isNew: false,
             hasGift: false,
@@ -63,13 +62,10 @@ const RelatedProducts = ({ currentProductId, category, onProductClick }) => {
     };
   }, [currentProductId, category]);
 
-  // Handle product navigation - can be customized per parent component
   const handleProductNavigation = (productId) => {
     if (onProductClick) {
-      // Use custom handler if provided
       onProductClick(productId);
     } else {
-      // Default navigation behavior
       window.location.href = `/products/${productId}`;
     }
   };
@@ -100,7 +96,7 @@ RelatedProducts.propTypes = {
     PropTypes.number
   ]).isRequired,
   category: PropTypes.string.isRequired,
-  onProductClick: PropTypes.func, // Optional custom navigation handler
+  onProductClick: PropTypes.func,
 };
 
 export default RelatedProducts;
