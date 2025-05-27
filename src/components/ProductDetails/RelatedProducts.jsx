@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import ProductCard from './ProductCard';
 import LoadingSpinner from './LoadingSpinner';
 
 const RelatedProducts = ({ currentProductId, category, onProductClick }) => {
   const [products, setProducts] = useState([]);
-  const [status, setStatus] = useState('idle'); 
+  const [status, setStatus] = useState('idle');
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!currentProductId || !category) return;
@@ -62,11 +64,14 @@ const RelatedProducts = ({ currentProductId, category, onProductClick }) => {
     };
   }, [currentProductId, category]);
 
+  // Handle product navigation using React Router
   const handleProductNavigation = (productId) => {
     if (onProductClick) {
+      // Use custom handler if provided
       onProductClick(productId);
     } else {
-      window.location.href = `/products/${productId}`;
+      // Default React Router navigation
+      navigate(`/products/${productId}`);
     }
   };
 
@@ -96,7 +101,7 @@ RelatedProducts.propTypes = {
     PropTypes.number
   ]).isRequired,
   category: PropTypes.string.isRequired,
-  onProductClick: PropTypes.func,
+  onProductClick: PropTypes.func, // Optional custom navigation handler
 };
 
 export default RelatedProducts;
