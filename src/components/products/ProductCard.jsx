@@ -5,8 +5,8 @@ import { Badge } from '../ui/Input/Badge';
 import { PriceDisplay } from '../ui/Input/PriceDisplay';
 import { RatingStars } from '../ui/Input/RatingStars';
 
-export const ProductCard = ({ 
-  product, 
+export const ProductCard = ({
+  product,
   viewType = 'grid',
   isLoading = false,
   onAddToCart = () => {},
@@ -16,7 +16,6 @@ export const ProductCard = ({
   const navigate = useNavigate();
 
   const handleCardClick = (e) => {
-    // Don't navigate if clicking on the add to cart button or its children
     if (!e.target.closest('.add-to-cart') && product?.id) {
       onClick ? onClick() : navigate(`/products/${product.id}`);
     }
@@ -25,24 +24,23 @@ export const ProductCard = ({
   if (isLoading) {
     return (
       <div className={`${
-        viewType === 'grid' 
+        viewType === 'grid'
           ? 'flex flex-col bg-white rounded-md shadow-sm relative'
           : 'flex flex-col sm:flex-row bg-white rounded-md shadow-sm relative'
       } animate-pulse`}>
         <div className={`${
           viewType === 'grid' ? 'p-4 flex justify-center' : 'sm:w-1/3 p-4 flex justify-center'
         }`}>
-          <div className="h-36 w-full bg-gray-200 rounded"></div>
+          <div className="h-36 w-full bg-gray-200 rounded" />
         </div>
-        
         <div className={`${
           viewType === 'grid' ? 'p-4 flex flex-col' : 'sm:w-2/3 p-4 flex flex-col'
         } space-y-3`}>
-          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-          <div className="h-4 bg-gray-200 rounded"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-          <div className="h-8 bg-gray-200 rounded mt-4"></div>
+          <div className="h-4 bg-gray-200 rounded w-3/4" />
+          <div className="h-4 bg-gray-200 rounded" />
+          <div className="h-4 bg-gray-200 rounded w-1/2" />
+          <div className="h-4 bg-gray-200 rounded w-1/4" />
+          <div className="h-8 bg-gray-200 rounded mt-4" />
         </div>
       </div>
     );
@@ -51,7 +49,7 @@ export const ProductCard = ({
   if (!product) {
     return (
       <div className={`${
-        viewType === 'grid' 
+        viewType === 'grid'
           ? 'flex flex-col bg-white rounded-md shadow-sm relative'
           : 'flex flex-col sm:flex-row bg-white rounded-md shadow-sm relative'
       } items-center justify-center p-8 text-gray-500`}>
@@ -61,15 +59,15 @@ export const ProductCard = ({
   }
 
   return (
-    <div 
+    <div
       className={`${
-        viewType === 'grid' 
+        viewType === 'grid'
           ? 'flex flex-col bg-white rounded-md shadow-sm relative hover:shadow-md transition-shadow h-full'
           : 'flex flex-col sm:flex-row bg-white rounded-md shadow-sm relative hover:shadow-md transition-shadow'
       } cursor-pointer`}
       onClick={handleCardClick}
     >
-      {/* Sale badge or New badge */}
+      {/* Sale or New badge */}
       {product.save ? (
         <div className="absolute top-2 left-2 bg-green-500 text-white text-xs font-medium py-1 px-2 rounded">
           SAVE<br />${product.save}
@@ -79,85 +77,77 @@ export const ProductCard = ({
           NEW
         </div>
       ) : null}
-      
+
       {/* Gift badge */}
       {product.gift && (
         <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-medium py-1 px-2 rounded">
           GIFT
         </div>
       )}
-      
-      {/* Product image */}
-      <div className={`${
+      {/* Image */}
+      <div className={`overflow-hidden rounded-md ${
         viewType === 'grid' ? 'p-4 flex justify-center' : 'sm:w-1/3 p-4 flex justify-center'
       }`}>
-        <img 
-          src={product.image} 
+        <img
+          src={product.image}
           alt={product.name}
-          className={`${viewType === 'grid' ? 'h-36' : 'h-48'} w-auto object-contain`}
+          className={`
+            ${viewType === 'grid' ? 'h-36' : 'h-48'}
+            w-auto object-contain
+            transition-all duration-300 ease-in-out
+            hover:scale-105 hover:shadow-md hover:opacity-90
+          `}
           loading="lazy"
           onError={(e) => {
             e.target.src = 'https://via.placeholder.com/150?text=No+Image';
           }}
         />
       </div>
-      
-      {/* Product details */}
+
+      {/* Details */}
       <div className={`${
         viewType === 'grid' ? 'p-4 flex flex-col flex-grow' : 'sm:w-2/3 p-4 flex flex-col flex-grow'
       }`}>
-        {/* Review count */}
+        {/* Reviews */}
         {product.reviews > 0 && (
           <div className="flex items-center text-xs text-gray-500 mb-2">
-            <RatingStars 
-              rating={4} 
-              size={12} 
-              showCount 
-              count={product.reviews} 
-            />
+            <RatingStars rating={4} size={12} showCount count={product.reviews} />
           </div>
         )}
-        
-        <h3 className="text-sm font-medium mb-1 line-clamp-2">
-          {product.name}
-        </h3>
-        
-        {/* Product description - different styling for grid vs list */}
+
+        <h3 className="text-sm font-medium mb-1 line-clamp-2">{product.name}</h3>
+
+        {/* Description */}
         <p className={`${
-          viewType === 'grid' 
-            ? 'text-xs text-gray-600 mb-2 line-clamp-2' 
+          viewType === 'grid'
+            ? 'text-xs text-gray-600 mb-2 line-clamp-2'
             : 'text-sm text-gray-700 mb-3 line-clamp-3'
         }`}>
           {product.description || 'No description available'}
         </p>
-        
-        {/* Price display */}
+
+        {/* Price */}
         <div className="mb-2">
-          <PriceDisplay 
-            price={product.price} 
-            originalPrice={product.originalPrice} 
-            priceRange={product.priceRange} 
+          <PriceDisplay
+            price={product.price}
+            originalPrice={product.originalPrice}
+            priceRange={product.priceRange}
           />
         </div>
-        
-        {/* Shipping and gift information */}
+
+        {/* Shipping + Gift info */}
         <div className="flex flex-wrap gap-2 mb-1">
           <div className={`text-xs ${
-            product.shipping === 'FREE SHIPPING' 
-              ? 'text-green-500' 
-              : 'text-gray-600'
+            product.shipping === 'FREE SHIPPING' ? 'text-green-500' : 'text-gray-600'
           }`}>
             {product.shipping}
           </div>
-          
           {product.gift && (
-            <div className="text-xs text-red-500">
-              FREE GIFT
-            </div>
+            <div className="text-xs text-red-500">FREE GIFT</div>
           )}
         </div>
-        
-        {/* Stock or contact status */}
+
+        {/* Stock status */}
         {product.stock ? (
           <Badge type="success" text="In stock" />
         ) : product.contact ? (
@@ -165,12 +155,12 @@ export const ProductCard = ({
         ) : (
           <Badge type="error" text="Out of stock" />
         )}
-        
-        {/* Add to cart button */}
-        <button 
+
+        {/* Add to Cart */}
+        <button
           className={`add-to-cart mt-4 w-full ${
-            product.stock 
-              ? 'bg-blue-500 hover:bg-blue-600' 
+            product.stock
+              ? 'bg-blue-500 hover:bg-blue-600'
               : 'bg-gray-400 cursor-not-allowed'
           } text-white py-2 px-4 rounded-md flex items-center justify-center gap-2 transition-colors`}
           onClick={(e) => {
