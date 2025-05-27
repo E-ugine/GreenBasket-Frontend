@@ -20,7 +20,7 @@ const fetchApi = async (endpoint, options = {}, retries = 3) => {
 
       if (!response.ok) {
         if (response.status === 404) {
-          return { error: `Resource not found: ${endpoint}` };
+          return { error: `Resource not found: ${endpoint}`, status: 404 };
         }
         throw new Error(`HTTP ${response.status} for ${endpoint}`);
       }
@@ -72,7 +72,7 @@ const transformProduct = (apiProduct) => {
     discount: Math.round(((apiProduct.price * 1.2) - apiProduct.price) / (apiProduct.price * 1.2) * 100),
     description: apiProduct.description,
     category: apiProduct.category,
-  image: apiProduct.image ? [apiProduct.image] : ['/placeholder-product.jpg'],
+    image: apiProduct.image ? [apiProduct.image] : ['/placeholder-product.jpg'],
     rating: apiProduct.rating?.rate || 0,
     stockCount: Math.floor(Math.random() * 50) + 10,
     isNew: Math.random() > 0.7,
@@ -97,7 +97,6 @@ const generateRandomMemorySizes = () => {
   const allSizes = ['64GB', '128GB', '256GB', '512GB', '1TB'];
   return allSizes.slice(0, Math.floor(Math.random() * 2) + 1);
 };
-
 const createFallbackProduct = (productId = 'unknown') => ({
   id: productId,
   name: 'Product Not Available',
@@ -106,10 +105,7 @@ const createFallbackProduct = (productId = 'unknown') => ({
   discount: 0,
   description: 'This product is currently unavailable.',
   category: 'unavailable',
-  images: [{ 
-    url: '/placeholder-product.jpg',
-    alt: 'Product not available'
-  }],
+  image: ['/placeholder-product.jpg'],
   rating: 0,
   stockCount: 0,
   isNew: false,
@@ -123,7 +119,7 @@ const createFallbackProduct = (productId = 'unknown') => ({
 export const fetchProductDetails = async (productId, options = {}) => {
   if (!productId) {
     console.warn('fetchProductDetails called without productId');
-    return createFallbackProduct();
+    return null; 
   }
 
   try {
@@ -132,18 +128,18 @@ export const fetchProductDetails = async (productId, options = {}) => {
 
     if (result.error) {
       console.error(`Failed to fetch product ${productId}:`, result.error);
-      return createFallbackProduct(productId);
+      return null;
     }
 
     const transformed = transformProduct(result);
-    return transformed || createFallbackProduct(productId);
+    return transformed;
   } catch (error) {
     if (error.name === 'AbortError') {
-      throw error;
+      throw error; 
     }
     
     console.error(`Error in fetchProductDetails for ${productId}:`, error);
-    return createFallbackProduct(productId);
+    return null; 
   }
 };
 
@@ -196,22 +192,23 @@ export const fetchCategories = async (options = {}) => {
 
 export const fetchFrequentlyBoughtTogether = async (productId, options = {}) => {
   try {
-    // First get the current product's category
     const product = await fetchProductDetails(productId, options);
     
-    // Then get all products in the same category
+    if (!product) {
+      return [];
+    }
+    
     const allProducts = await fetchProducts(options);
     const sameCategoryProducts = allProducts.filter(
       p => p.category === product.category && p.id !== parseInt(productId)
     );
-    
-    // Return 3-5 random products from the same category
+
     const shuffled = sameCategoryProducts.sort(() => 0.5 - Math.random());
     return shuffled.slice(0, 3 + Math.floor(Math.random() * 2)).map(item => ({
       id: item.id,
       name: item.name,
       price: item.price,
-      image: item.images?.[0]?.url || '/placeholder-product.jpg'
+      image: item.image?.[0] || '/placeholder-product.jpg'
     }));
   } catch (error) {
     if (error.name === 'AbortError') {
@@ -248,6 +245,11 @@ export const fetchRelatedProducts = async (productId, options = {}) => {
   try {
     const product = await fetchProductDetails(productId, options);
     
+    // If product doesn't exist, return empty array
+    if (!product) {
+      return [];
+    }
+    
     const allProducts = await fetchProducts(options);
     const sameCategoryProducts = allProducts.filter(
       p => p.category === product.category && p.id !== parseInt(productId)
@@ -259,7 +261,7 @@ export const fetchRelatedProducts = async (productId, options = {}) => {
       id: item.id,
       name: item.name,
       price: item.price,
-      image: item.image?.[0]?.url || '/placeholder-product.jpg',
+      image: item.image?.[0] || '/placeholder-product.jpg',
       rating: item.rating
     }));
   } catch (error) {
@@ -300,3 +302,5 @@ export const fetchRelatedProducts = async (productId, options = {}) => {
     ];
   }
 };
+
+export { createFallbackProduct };
