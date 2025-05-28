@@ -11,6 +11,7 @@ import Register from './pages/Register';
 import UserProfile from './pages/UserProfile';
 import Checkout from './components/forms/CheckoutForm/Checkout';
 import Filter from './components/ui/Filters/Filter';
+import Deals from './components/ui/Card/Deals';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<ProductView />} />
           <Route path="/products/:id" element={<ProductDetails />} />
+          <Route path="/deals" element={<Deals />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<UserProfile />} />

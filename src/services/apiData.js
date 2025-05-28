@@ -190,6 +190,28 @@ export const fetchCategories = async (options = {}) => {
   }
 };
 
+export const fetchProductsByCategory = async (category, options = {}) => {
+  try {
+    const result = await fetchApi(`products/category/${category}`, options);
+    
+    if (result.error) {
+      console.error(`Failed to fetch ${category} products:`, result.error);
+      return [];
+    }
+
+    return Array.isArray(result) 
+      ? result.map(p => transformProduct(p)).filter(Boolean)
+      : [];
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw error;
+    }
+    console.error(`Error in fetchProductsByCategory for ${category}:`, error);
+    return [];
+  }
+};
+
+
 export const fetchFrequentlyBoughtTogether = async (productId, options = {}) => {
   try {
     const product = await fetchProductDetails(productId, options);

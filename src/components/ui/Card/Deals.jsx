@@ -1,5 +1,7 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { fetchProducts } from '../../../services/apiData';
 
 export default function Deals() {
   const [timeLeft, setTimeLeft] = useState({
@@ -8,6 +10,9 @@ export default function Deals() {
     minutes: 3,
     seconds: 4
   });
+  const [electronicsProducts, setElectronicsProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -27,6 +32,40 @@ export default function Deals() {
 
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    const fetchElectronics = async () => {
+      try {
+        const allProducts = await fetchProducts();
+        const electronics = allProducts.filter(
+          product => product.category === 'electronics'
+        );
+        
+        const shuffled = [...electronics].sort(() => 0.5 - Math.random());
+        setElectronicsProducts(shuffled.slice(0, 2));
+      } catch (error) {
+        console.error('Error fetching electronics:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchElectronics();
+  }, []);
+
+  const handleProductClick = (id) => {
+    navigate(`/products/${id}`);
+  };
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
@@ -181,55 +220,39 @@ export default function Deals() {
 
         {/* Right sidebar offers */}
         <div className="w-full lg:w-1/4 flex flex-col gap-4">
-          {/* Xbox controller offer */}
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden relative group">
-            <div className="absolute top-4 right-4 bg-amber-400 text-gray-900 text-xs font-bold px-3 py-1 rounded-full z-10">
-              50% OFF
-            </div>
-            <div className="p-4">
-              <h3 className="text-lg font-bold text-gray-900 mb-1">Gaming Accessories</h3>
-              <p className="text-sm text-gray-600 mb-3">Xbox Wireless Controllers</p>
-              <div className="flex justify-center h-32">
-                <img 
-                  src="https://i.pinimg.com/736x/e4/ca/8e/e4ca8ebb44d61a5922e4393f53f85a1d.jpg" 
-                  alt="Xbox controllers" 
-                  className="object-contain group-hover:scale-105 transition-transform duration-300" 
-                />
+          {electronicsProducts.map((product) => (
+            <div 
+              key={product.id} 
+              className="bg-white rounded-xl shadow-lg overflow-hidden relative group cursor-pointer"
+              onClick={() => handleProductClick(product.id)}
+            >
+              <div className="absolute top-4 right-4 bg-amber-400 text-gray-900 text-xs font-bold px-3 py-1 rounded-full z-10">
+                {product.discount}% OFF
               </div>
-              <div className="mt-3 flex justify-between items-center">
-                <div>
-                  <span className="text-gray-900 font-bold">$49.99</span>
-                  <span className="text-gray-400 line-through text-sm ml-2">$99.99</span>
+              <div className="p-4">
+                <h3 className="text-lg font-bold text-gray-900 mb-1">{product.category}</h3>
+                <p className="text-sm text-gray-600 mb-3">{product.name}</p>
+                <div className="flex justify-center h-32">
+                  <img 
+                    src={product.image[0]} 
+                    alt={product.name} 
+                    className="object-contain group-hover:scale-105 transition-transform duration-300" 
+                  />
                 </div>
-                <button className="text-emerald-600 hover:text-emerald-700 text-sm font-medium">
-                  Shop Now →
-                </button>
-              </div>
-            </div>
-          </div>
-          
-          {/* Tablets and laptops offer */}
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden relative group">
-            <div className="p-4">
-              <h3 className="text-lg font-bold text-gray-900 mb-1">Tech Essentials</h3>
-              <p className="text-sm text-gray-600 mb-3">Tablets & Laptops</p>
-              <div className="flex justify-center h-32">
-                <img 
-                  src="https://i.pinimg.com/736x/8d/19/df/8d19df0f1d0347d9dec351afa2554106.jpg" 
-                  alt="Tablets and laptops" 
-                  className="object-contain group-hover:scale-105 transition-transform duration-300" 
-                />
-              </div>
-              <div className="mt-3 flex justify-between items-center">
-                <div>
-                  <span className="text-gray-900 font-bold">Up to 30% OFF</span>
+                <div className="mt-3 flex justify-between items-center">
+                  <div>
+                    <span className="text-gray-900 font-bold">${product.price.toFixed(2)}</span>
+                    <span className="text-gray-400 line-through text-sm ml-2">
+                      ${product.originalPrice.toFixed(2)}
+                    </span>
+                  </div>
+                  <button className="text-emerald-600 hover:text-emerald-700 text-sm font-medium">
+                    Shop Now →
+                  </button>
                 </div>
-                <button className="text-emerald-600 hover:text-emerald-700 text-sm font-medium">
-                  Shop Now →
-                </button>
               </div>
             </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>
