@@ -9,8 +9,6 @@ const NAV_LINKS = [
   { name: 'Contact', path: '/contact', aria: 'Contact our support team' }
 ];
 
-
-
 const TopBarInfo = () => (
   <div className="hidden sm:flex items-center">
     <span className="bg-gray-100 rounded-md px-3 py-1 text-gray-700 mr-2 text-sm">
@@ -47,7 +45,7 @@ const CurrencyLanguageSelector = () => (
 const SearchBar = ({ searchText, setSearchText, onSubmit, isMobile = false }) => (
   <form 
     onSubmit={onSubmit}
-    className={`${isMobile ? 'mb-4' : 'hidden md:flex flex-1 mx-6 lg:mx-8 max-w-xl'}`}
+    className={`${isMobile ? 'mb-4 w-full' : 'hidden md:flex flex-1 mx-4 lg:mx-6 max-w-xl'}`}
   >
     <label htmlFor="search" className="sr-only">Search products</label>
     <div className="relative w-full">
@@ -57,13 +55,23 @@ const SearchBar = ({ searchText, setSearchText, onSubmit, isMobile = false }) =>
         value={searchText}
         onChange={(e) => setSearchText(e.target.value)}
         placeholder="Search for products..."
-        className="w-full border border-gray-300 rounded-l-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+        className="w-full border border-gray-300 rounded-l-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm md:text-base"
         aria-label="Search products"
       />
+      {searchText && (
+        <button
+          type="button"
+          onClick={() => setSearchText('')}
+          className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          aria-label="Clear search"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      )}
     </div>
     <button
       type="submit"
-      className="bg-green-600 text-white px-4 rounded-r-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
+      className="bg-green-600 text-white px-4 py-2 rounded-r-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
       aria-label="Submit search"
     >
       <Search className="w-5 h-5" />
@@ -80,7 +88,6 @@ const Navbar = () => {
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -118,16 +125,16 @@ const Navbar = () => {
       <div className="fixed top-0 left-0 w-full bg-white shadow-sm z-50">
         <div className="hidden sm:flex justify-between items-center py-2 px-4 sm:px-6 border-b border-gray-100">
           <TopBarInfo />
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-4 lg:space-x-6">
             <Link 
               to="/sell" 
-              className="text-gray-600 hover:text-green-600 text-sm focus:outline-none focus:underline"
+              className="text-gray-600 hover:text-green-600 text-sm focus:outline-none focus:underline transition-colors"
             >
               Sell on GreenBasket
             </Link>
             <Link 
               to="/track-order" 
-              className="text-gray-600 hover:text-green-600 text-sm focus:outline-none focus:underline"
+              className="text-gray-600 hover:text-green-600 text-sm focus:outline-none focus:underline transition-colors"
             >
               Order Tracking
             </Link>
@@ -138,11 +145,11 @@ const Navbar = () => {
         {/* Main navbar */}
         <div className="flex justify-between items-center py-3 px-4 sm:px-6">
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
+          <div className="flex items-center md:hidden">
             <button 
               onClick={toggleMobileMenu}
               aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-              className="p-2 rounded-md text-gray-700 hover:text-green-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="p-2 rounded-md text-gray-700 hover:text-green-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -171,14 +178,14 @@ const Navbar = () => {
           />
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-6 lg:space-x-8">
+          <nav className="hidden md:flex space-x-4 lg:space-x-6">
             {NAV_LINKS.map((link) => (
               <NavLink
                 key={link.path}
                 to={link.path}
                 aria-label={link.aria}
                 className={({ isActive }) => 
-                  `text-sm font-medium hover:text-green-600 focus:outline-none focus:underline ${
+                  `text-sm font-medium hover:text-green-600 focus:outline-none focus:underline transition-colors ${
                     isActive ? 'text-green-600 underline' : 'text-gray-800'
                   }`
                 }
@@ -186,7 +193,6 @@ const Navbar = () => {
                 {link.name}
               </NavLink>
             ))}
-          
           </nav>
 
           {/* User area */}
@@ -194,7 +200,7 @@ const Navbar = () => {
             <Link 
               to="/account" 
               aria-label="User account"
-              className="hidden sm:flex w-10 h-10 bg-gray-100 rounded-full items-center justify-center hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="hidden sm:flex w-10 h-10 bg-gray-100 rounded-full items-center justify-center hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
             >
               <User className="w-5 h-5 text-gray-600" />
             </Link>
@@ -202,7 +208,7 @@ const Navbar = () => {
             <Link 
               to="/wishlist" 
               aria-label="Wishlist"
-              className="hidden sm:flex w-10 h-10 bg-gray-100 rounded-full items-center justify-center hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="hidden sm:flex w-10 h-10 bg-gray-100 rounded-full items-center justify-center hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
             >
               <Heart className="w-5 h-5 text-gray-600" />
             </Link>
@@ -212,14 +218,14 @@ const Navbar = () => {
               <div className="text-sm font-medium space-x-2">
                 <Link 
                   to="/login" 
-                  className="hover:underline text-gray-800 focus:outline-none focus:underline"
+                  className="hover:underline text-gray-800 focus:outline-none focus:underline transition-colors"
                 >
                   LOG IN
                 </Link>
                 <span className="text-gray-400">/</span>
                 <Link 
                   to="/register" 
-                  className="hover:underline text-gray-800 focus:outline-none focus:underline"
+                  className="hover:underline text-gray-800 focus:outline-none focus:underline transition-colors"
                 >
                   REGISTER
                 </Link>
@@ -229,10 +235,10 @@ const Navbar = () => {
             <Link 
               to="/cart" 
               aria-label="Shopping cart"
-              className="flex items-center hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-green-500 rounded-full"
+              className="flex items-center hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-green-500 rounded-full transition-opacity"
             >
               <div className="relative">
-                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200">
+                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors">
                   <ShoppingCart className="w-5 h-5 text-gray-600" />
                 </div>
                 <div className="absolute -top-1 -right-1 bg-green-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
@@ -252,6 +258,7 @@ const Navbar = () => {
           className={`md:hidden bg-white border-t border-gray-100 px-4 py-3 transition-all duration-300 ease-in-out overflow-hidden ${
             mobileMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
           }`}
+          ref={dropdownRef}
         >
           <div className="flex justify-between items-center mb-4">
             <TopBarInfo />
@@ -274,7 +281,7 @@ const Navbar = () => {
                 className={({ isActive }) => 
                   `block py-2 text-sm font-medium ${
                     isActive ? 'text-green-600' : 'text-gray-800 hover:text-green-600'
-                  } focus:outline-none focus:underline`
+                  } focus:outline-none focus:underline transition-colors`
                 }
                 onClick={toggleMobileMenu}
               >
@@ -285,14 +292,14 @@ const Navbar = () => {
             <div className="border-t border-gray-100 pt-3">
               <Link 
                 to="/sell" 
-                className="block py-2 text-sm text-gray-800 hover:text-green-600 focus:outline-none focus:underline"
+                className="block py-2 text-sm text-gray-800 hover:text-green-600 focus:outline-none focus:underline transition-colors"
                 onClick={toggleMobileMenu}
               >
                 Sell on GreenBasket
               </Link>
               <Link 
                 to="/track-order" 
-                className="block py-2 text-sm text-gray-800 hover:text-green-600 focus:outline-none focus:underline"
+                className="block py-2 text-sm text-gray-800 hover:text-green-600 focus:outline-none focus:underline transition-colors"
                 onClick={toggleMobileMenu}
               >
                 Order Tracking
@@ -303,16 +310,9 @@ const Navbar = () => {
       </div>
 
       {/* Spacer to prevent content from being hidden behind fixed navbar */}
-      
-      
+      <div className="h-20 md:h-24"></div>
     </>
-    
   );
-};
-
-Navbar.propTypes = {
-  
- 
 };
 
 export default Navbar;
